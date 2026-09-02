@@ -10,9 +10,74 @@
         #slider-container { position:absolute; bottom:25px; left:30%; width:40%; height:6px; background:rgba(0,0,0,0.08); border-radius:3px; }
         #slider { -webkit-appearance:none; appearance:none; width:100%; height:100%; background:transparent; margin:0; outline:none; cursor:pointer; }
         #slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:14px; height:14px; border-radius:50%; background:rgba(0,180,255,0.6); }
+        #settings-toggle { position:absolute; top:18px; right:20px; z-index:30; border:none; border-radius:999px; background:rgba(17,21,28,0.72); color:#eaf7ff; padding:10px 16px; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; }
+        #settings-overlay { position:fixed; inset:0; background:rgba(7,10,14,0.52); display:flex; align-items:center; justify-content:center; z-index:40; opacity:0; pointer-events:none; transition:opacity 0.2s ease; }
+        #settings-overlay.visible { opacity:1; pointer-events:auto; }
+        #settings-panel { width:min(460px, calc(100vw - 32px)); background:rgba(15,18,22,0.9); border:1px solid rgba(255,255,255,0.15); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,0.38); padding:18px 18px 12px; }
+        .settings-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+        .settings-header h2 { margin:0; color:#edf5ff; font-size:18px; }
+        .close-btn { border:none; border-radius:10px; background:rgba(255,255,255,0.08); color:#edf5ff; padding:7px 10px; cursor:pointer; }
+        .settings-grid { display:grid; grid-template-columns:repeat(2, minmax(150px, 1fr)); gap:12px; }
+        .setting { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 10px 8px; }
+        .setting label { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#d8e9ff; margin-bottom:8px; }
+        .setting output { color:#8ed8ff; font-weight:600; }
+        .setting input[type="range"] { width:100%; accent-color:#69d8ff; }
+        .setting input[type="number"] { width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#eef8ff; border-radius:8px; padding:6px 8px; box-sizing:border-box; }
+        .settings-actions { display:flex; justify-content:flex-end; margin-top:14px; }
+        .settings-actions button { border:none; border-radius:10px; padding:10px 14px; cursor:pointer; }
+        .primary-btn { background:#69d8ff; color:#06131b; font-weight:700; }
+        .secondary-btn { background:rgba(255,255,255,0.06); color:#edf5ff; margin-right:8px; }
+        @media (max-width: 520px) { .settings-grid { grid-template-columns:1fr; } }
     </style>
 </head>
 <body>
+    <button id="settings-toggle" type="button">Cluster Settings</button>
+    <div id="settings-overlay" aria-hidden="true">
+        <div id="settings-panel" role="dialog" aria-modal="true" aria-label="Cluster settings">
+            <div class="settings-header">
+                <h2>Cluster Settings</h2>
+                <button id="close-settings" class="close-btn" type="button">Close</button>
+            </div>
+            <div class="settings-grid">
+                <div class="setting">
+                    <label for="centerRadiusInput"><span>Center spacing</span><output id="centerRadiusValue">3.8</output></label>
+                    <input id="centerRadiusInput" type="range" min="2" max="10" step="0.1" value="3.8">
+                </div>
+                <div class="setting">
+                    <label for="rootScaleInput"><span>Root scale</span><output id="rootScaleValue">2.7</output></label>
+                    <input id="rootScaleInput" type="range" min="1.5" max="5" step="0.1" value="2.7">
+                </div>
+                <div class="setting">
+                    <label for="stage1To2Input"><span>Stage 1→2 spacing</span><output id="stage1To2Value">0.72</output></label>
+                    <input id="stage1To2Input" type="range" min="0.3" max="1.8" step="0.01" value="0.72">
+                </div>
+                <div class="setting">
+                    <label for="stage2To3Input"><span>Stage 2→3 spacing</span><output id="stage2To3Value">0.82</output></label>
+                    <input id="stage2To3Input" type="range" min="0.3" max="1.8" step="0.01" value="0.82">
+                </div>
+                <div class="setting">
+                    <label for="stage2ScaleInput"><span>Stage 2 scale</span><output id="stage2ScaleValue">2.2</output></label>
+                    <input id="stage2ScaleInput" type="range" min="1" max="4" step="0.1" value="2.2">
+                </div>
+                <div class="setting">
+                    <label for="stage3ScaleInput"><span>Stage 3 scale</span><output id="stage3ScaleValue">1.35</output></label>
+                    <input id="stage3ScaleInput" type="range" min="0.5" max="3" step="0.05" value="1.35">
+                </div>
+                <div class="setting">
+                    <label for="nodeDriftInput"><span>Node drift</span><output id="nodeDriftValue">0.05</output></label>
+                    <input id="nodeDriftInput" type="range" min="0" max="0.2" step="0.01" value="0.05">
+                </div>
+                <div class="setting">
+                    <label for="lineThicknessInput"><span>Line weight</span><output id="lineThicknessValue">1</output></label>
+                    <input id="lineThicknessInput" type="range" min="0.5" max="2.2" step="0.1" value="1">
+                </div>
+            </div>
+            <div class="settings-actions">
+                <button id="reset-settings" class="secondary-btn" type="button">Reset</button>
+                <button id="apply-settings" class="primary-btn" type="button">Apply</button>
+            </div>
+        </div>
+    </div>
     <div id="slider-container"><input type="range" id="slider" min="0" max="6.28" step="0.01" value="0"></div>
     <script>
         const canvas = document.createElement('canvas'); document.body.appendChild(canvas); const ctx = canvas.getContext('2d');
@@ -30,7 +95,80 @@
         let floatingPulse = 0; let introProgress = 0; let micLevel = 0;
         let micReady = false;
         const audioState = { context: null, analyser: null, source: null, data: null };
-        const cylinderRadius = 3.8;
+        const clusterSettingsKey = 'blank-cluster-settings';
+        const defaultClusterSettings = {
+            centerRadius: 3.8,
+            rootScale: 2.7,
+            stage1To2: 0.72,
+            stage2To3: 0.82,
+            stage2Scale: 2.2,
+            stage3Scale: 1.35,
+            nodeDrift: 0.05,
+            lineWeight: 1.0
+        };
+        let clusterSettings = { ...defaultClusterSettings };
+        let cylinderRadius = clusterSettings.centerRadius;
+
+        function loadClusterSettings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(clusterSettingsKey) || '{}');
+                clusterSettings = { ...defaultClusterSettings, ...saved };
+            } catch (error) {
+                clusterSettings = { ...defaultClusterSettings };
+            }
+            cylinderRadius = clusterSettings.centerRadius;
+        }
+
+        function saveClusterSettings() {
+            localStorage.setItem(clusterSettingsKey, JSON.stringify(clusterSettings));
+        }
+
+        function syncSettingsControls() {
+            const controls = {
+                centerRadiusInput: document.getElementById('centerRadiusInput'),
+                rootScaleInput: document.getElementById('rootScaleInput'),
+                stage1To2Input: document.getElementById('stage1To2Input'),
+                stage2To3Input: document.getElementById('stage2To3Input'),
+                stage2ScaleInput: document.getElementById('stage2ScaleInput'),
+                stage3ScaleInput: document.getElementById('stage3ScaleInput'),
+                nodeDriftInput: document.getElementById('nodeDriftInput'),
+                lineThicknessInput: document.getElementById('lineThicknessInput')
+            };
+
+            controls.centerRadiusInput.value = clusterSettings.centerRadius;
+            controls.rootScaleInput.value = clusterSettings.rootScale;
+            controls.stage1To2Input.value = clusterSettings.stage1To2;
+            controls.stage2To3Input.value = clusterSettings.stage2To3;
+            controls.stage2ScaleInput.value = clusterSettings.stage2Scale;
+            controls.stage3ScaleInput.value = clusterSettings.stage3Scale;
+            controls.nodeDriftInput.value = clusterSettings.nodeDrift;
+            controls.lineThicknessInput.value = clusterSettings.lineWeight;
+
+            document.getElementById('centerRadiusValue').textContent = Number(clusterSettings.centerRadius).toFixed(1);
+            document.getElementById('rootScaleValue').textContent = Number(clusterSettings.rootScale).toFixed(1);
+            document.getElementById('stage1To2Value').textContent = Number(clusterSettings.stage1To2).toFixed(2);
+            document.getElementById('stage2To3Value').textContent = Number(clusterSettings.stage2To3).toFixed(2);
+            document.getElementById('stage2ScaleValue').textContent = Number(clusterSettings.stage2Scale).toFixed(1);
+            document.getElementById('stage3ScaleValue').textContent = Number(clusterSettings.stage3Scale).toFixed(2);
+            document.getElementById('nodeDriftValue').textContent = Number(clusterSettings.nodeDrift).toFixed(2);
+            document.getElementById('lineThicknessValue').textContent = Number(clusterSettings.lineWeight).toFixed(1);
+        }
+
+        function applySettingsFromInputs() {
+            clusterSettings.centerRadius = Number(document.getElementById('centerRadiusInput').value);
+            clusterSettings.rootScale = Number(document.getElementById('rootScaleInput').value);
+            clusterSettings.stage1To2 = Number(document.getElementById('stage1To2Input').value);
+            clusterSettings.stage2To3 = Number(document.getElementById('stage2To3Input').value);
+            clusterSettings.stage2Scale = Number(document.getElementById('stage2ScaleInput').value);
+            clusterSettings.stage3Scale = Number(document.getElementById('stage3ScaleInput').value);
+            clusterSettings.nodeDrift = Number(document.getElementById('nodeDriftInput').value);
+            clusterSettings.lineWeight = Number(document.getElementById('lineThicknessInput').value);
+            cylinderRadius = clusterSettings.centerRadius;
+            saveClusterSettings();
+            syncSettingsControls();
+        }
+
+        loadClusterSettings();
 
         const stage1Nodes = [
             { id: "NavRoot", baseAngle: 0.0, y: -1.00, scale: 2.7, light: {r:0,g:190,b:240}, dark: {r:0,g:240,b:255}, symbol: "map" },
@@ -169,32 +307,11 @@
         function drawCoreOrb() {
             const centerX = width * 0.5;
             const centerY = height * 0.5;
-            const baseRadius = 72;
-            const wobble = 10;
-            const points = 44;
+            const dotRadius = 4.5;
 
             ctx.beginPath();
-            for (let i = 0; i <= points; i++) {
-                const angle = (i / points) * Math.PI * 2;
-                const wave = 1 + Math.sin(angle * 5.5 + floatingPulse * 3.6) * 0.12;
-                const radius = baseRadius * wave + Math.sin(angle * 11.5 - floatingPulse * 2.8) * wobble * 0.45;
-                const x = centerX + Math.cos(angle) * radius;
-                const y = centerY + Math.sin(angle) * radius * 0.9;
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.closePath();
-
-            const greyFill = ctx.createRadialGradient(centerX - 18, centerY - 24, 12, centerX, centerY, baseRadius * 1.6);
-            greyFill.addColorStop(0, `rgba(248,248,248,0.92)`);
-            greyFill.addColorStop(0.22, `rgba(200,204,208,0.83)`);
-            greyFill.addColorStop(0.62, `rgba(126,130,136,0.74)`);
-            greyFill.addColorStop(1, `rgba(58,62,68,0.82)`);
-            ctx.fillStyle = greyFill;
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.fillStyle = 'rgba(255,255,255,0.18)';
-            ctx.arc(centerX - baseRadius * 0.3, centerY - baseRadius * 0.25, baseRadius * 0.45, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(130, 140, 150, 0.22)';
+            ctx.arc(centerX, centerY, dotRadius, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -202,10 +319,9 @@
             const centerX = width * 0.5;
             const centerY = height * 0.5;
             const angle = Math.atan2(point.y - centerY, point.x - centerX);
-            const pull = 42 + micLevel * 22;
             return {
-                x: point.x + Math.cos(angle) * point.size * radiusScale + Math.cos(angle * 3.0 + floatingPulse) * pull * 0.12,
-                y: point.y + Math.sin(angle) * point.size * radiusScale + Math.sin(angle * 3.0 + floatingPulse) * pull * 0.12
+                x: point.x + Math.cos(angle) * point.size * radiusScale,
+                y: point.y + Math.sin(angle) * point.size * radiusScale
             };
         }
 
@@ -280,6 +396,14 @@
             const computedMap = { core: { x: 0, y: 0, z: 0, screen: centerHub } };
             const allElementsToDraw = [];
 
+            const stage1ScaleMultiplier = clusterSettings.rootScale / 2.7;
+            const stage2ScaleMultiplier = clusterSettings.stage2Scale / 2.2;
+            const stage3ScaleMultiplier = clusterSettings.stage3Scale / 1.35;
+            const stage1Spread = clusterSettings.stage1To2;
+            const stage2Spread = clusterSettings.stage2To3;
+            const driftAmount = clusterSettings.nodeDrift;
+            const lineWeightMultiplier = clusterSettings.lineWeight;
+
             [...stage1Nodes, glitchNode].forEach(node => {
                 const finalAngle = node.baseAngle + rotationAngle;
                 const introFactor = 0.18 + introProgress * 0.82;
@@ -296,7 +420,7 @@
                 }
 
                 const p = project(rx, ry, rz);
-                p.size *= node.scale * (0.9 + introProgress * 0.22);
+                p.size *= node.scale * stage1ScaleMultiplier * (0.9 + introProgress * 0.22);
                 computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p };
                 allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: { ...node, tier: 1 }, tier: 1 });
             });
@@ -304,11 +428,11 @@
             stage2Nodes.forEach(node => {
                 const pNode = computedMap[node.parentId];
                 if (!pNode) return;
-                const rx = pNode.x + node.offsetX * (0.72 + introProgress * 0.88);
-                const ry = pNode.y + node.offsetY * (0.72 + introProgress * 0.88) + Math.sin(floatingPulse * 1.5 + node.offsetX) * 0.05;
-                const rz = pNode.z + node.offsetZ * (0.52 + introProgress * 1.08);
+                const rx = pNode.x + node.offsetX * (stage1Spread + introProgress * 0.88);
+                const ry = pNode.y + node.offsetY * (stage1Spread + introProgress * 0.88) + Math.sin(floatingPulse * 1.5 + node.offsetX) * driftAmount;
+                const rz = pNode.z + node.offsetZ * (stage2Spread + introProgress * 1.08);
                 const p = project(rx, ry, rz);
-                p.size *= node.scale * (1.26 + introProgress * 0.22);
+                p.size *= node.scale * stage2ScaleMultiplier * (1.26 + introProgress * 0.22);
                 computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p };
                 allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: { ...node, tier: 2 }, tier: 2 });
             });
@@ -316,11 +440,11 @@
             stage3Nodes.forEach(node => {
                 const pNode = computedMap[node.parentId];
                 if (!pNode) return;
-                const rx = pNode.x + node.offsetX * (0.82 + introProgress * 0.78);
-                const ry = pNode.y + node.offsetY * (0.82 + introProgress * 0.78) + Math.cos(floatingPulse + node.offsetX) * 0.04;
-                const rz = pNode.z + node.offsetZ * (0.82 + introProgress * 0.58);
+                const rx = pNode.x + node.offsetX * (stage2Spread + introProgress * 0.78);
+                const ry = pNode.y + node.offsetY * (stage2Spread + introProgress * 0.78) + Math.cos(floatingPulse + node.offsetX) * driftAmount * 0.8;
+                const rz = pNode.z + node.offsetZ * (stage2Spread + introProgress * 0.58);
                 const p = project(rx, ry, rz);
-                p.size *= node.scale * 1.35;
+                p.size *= node.scale * stage3ScaleMultiplier;
                 computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p };
                 allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: { ...node, tier: 3 }, tier: 3 });
             });
@@ -330,7 +454,7 @@
                 const to = computedMap[node.id]?.screen;
                 if (!to) return;
                 const surfAngle = node.baseAngle + rotationAngle;
-                const innerRadius = 70;
+                const innerRadius = 58;
                 const from = {
                     x: width * 0.5 + Math.cos(surfAngle) * innerRadius,
                     y: height * 0.5 + Math.sin(surfAngle) * innerRadius * 0.9,
@@ -347,7 +471,7 @@
                 const parentNode = [...stage1Nodes, glitchNode].find(n => n.id === item.node.parentId) || null;
                 const parentColor = parentNode ? (isDarkMode ? parentNode.dark : parentNode.light) : {r:255,g:255,b:255};
                 const alpha = Math.max(0.15, 1 - ((item.depth + 1.4) / 10));
-                const from = getSurfaceAnchor(parentProj.screen, item.tier === 3 ? 2.2 : 1.8);
+                const from = getSurfaceAnchor(parentProj.screen, item.tier === 3 ? 1.7 : 1.45);
                 connectionLinks.push({ from, to: item, alpha, tier: item.tier, color: parentColor });
             });
 
@@ -363,7 +487,7 @@
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
-                ctx.lineWidth = link.tier === 3 ? 8.5 : (link.tier === 2 ? 5.8 : 4.5);
+                ctx.lineWidth = (link.tier === 3 ? 8.5 : (link.tier === 2 ? 5.8 : 4.5)) * lineWeightMultiplier;
                 ctx.shadowBlur = link.tier === 3 ? 10 : 7;
                 ctx.shadowColor = `rgba(${link.color.r}, ${link.color.g}, ${link.color.b}, ${link.alpha * 0.5})`;
                 ctx.strokeStyle = color;
@@ -372,7 +496,7 @@
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
-                ctx.lineWidth = link.tier === 3 ? 3.6 : (link.tier === 2 ? 2.5 : 1.8);
+                ctx.lineWidth = (link.tier === 3 ? 3.6 : (link.tier === 2 ? 2.5 : 1.8)) * lineWeightMultiplier;
                 ctx.shadowBlur = 0;
                 ctx.strokeStyle = `rgba(255,255,255,${link.alpha * 0.38})`;
                 ctx.stroke();
@@ -433,6 +557,47 @@
         window.addEventListener('touchend', () => { initialPinchDist = null; });
         window.addEventListener('pointerdown', setupMicrophoneInput, { once: true });
 
+        const settingsToggle = document.getElementById('settings-toggle');
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const closeSettings = document.getElementById('close-settings');
+        const applySettings = document.getElementById('apply-settings');
+        const resetSettings = document.getElementById('reset-settings');
+
+        function openSettings() {
+            settingsOverlay.classList.add('visible');
+            settingsOverlay.setAttribute('aria-hidden', 'false');
+            syncSettingsControls();
+        }
+
+        function closeSettingsPanel() {
+            settingsOverlay.classList.remove('visible');
+            settingsOverlay.setAttribute('aria-hidden', 'true');
+        }
+
+        settingsToggle.addEventListener('click', openSettings);
+        closeSettings.addEventListener('click', closeSettingsPanel);
+        settingsOverlay.addEventListener('click', (event) => {
+            if (event.target === settingsOverlay) closeSettingsPanel();
+        });
+        applySettings.addEventListener('click', () => {
+            applySettingsFromInputs();
+            closeSettingsPanel();
+        });
+        resetSettings.addEventListener('click', () => {
+            clusterSettings = { ...defaultClusterSettings };
+            cylinderRadius = clusterSettings.centerRadius;
+            saveClusterSettings();
+            syncSettingsControls();
+        });
+
+        ['centerRadiusInput','rootScaleInput','stage1To2Input','stage2To3Input','stage2ScaleInput','stage3ScaleInput','nodeDriftInput','lineThicknessInput']
+            .forEach(id => {
+                const input = document.getElementById(id);
+                input.addEventListener('input', () => {
+                    applySettingsFromInputs();
+                });
+            });
+
         function launchNodeIntent(node) {
             const target = node.intent || node.fallbackUrl;
             if (!target) {
@@ -478,6 +643,7 @@
 
         window.addEventListener('click', checkTapLocation);
         window.addEventListener('touchstart', checkTapLocation);
+        syncSettingsControls();
         renderLoop();
     </script>
 </body>
