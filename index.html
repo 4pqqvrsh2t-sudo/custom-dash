@@ -34,17 +34,17 @@
             { id: "FutureRoot", baseAngle: 5.2, y: -0.2, scale: 2.2, light: {r:130,g:150,b:180}, dark: {r:100,g:110,b:140}, symbol: "plus" }
         ];
                const stage2Nodes = [
-            { id: "GoogleMaps", parentId: "NavRoot", offsetX: -0.75, offsetY: 0.55, offsetZ: -0.6, scale: 1.4, light: {r:0,g:170,b:230}, dark: {r:0,g:200,b:255}, symbol: "nav", intent: "intent://#Intent;scheme=root;package=com.google.android.apps.maps;end" },
-            { id: "Waze", parentId: "NavRoot", offsetX: 0.7, offsetY: 0.4, offsetZ: 0.7, scale: 1.4, light: {r:30,g:200,b:240}, dark: {r:0,g:230,b:255}, symbol: "nav", intent: "intent://#Intent;scheme=root;package=com.waze;end" },
-            { id: "Spotify", parentId: "MediaRoot", offsetX: -0.8, offsetY: -0.55, offsetZ: 0.6, scale: 1.4, light: {r:0,g:220,b:100}, dark: {r:0,g:255,b:120}, symbol: "music", intent: "intent://#Intent;scheme=root;package=com.spotify.music;end" },
-            { id: "YouTube", parentId: "MediaRoot", offsetX: 0.65, offsetY: -0.55, offsetZ: -0.6, scale: 1.4, light: {r:100,g:230,b:150}, dark: {r:130,g:255,b:180}, symbol: "play", intent: "intent://#Intent;scheme=root;package=com.google.android.youtube;end" },
-            { id: "RadioApp", parentId: "MediaRoot", offsetX: 0.1, offsetY: -0.85, offsetZ: 0.3, scale: 1.4, light: {r:0,g:210,b:180}, dark: {r:0,g:240,b:210}, symbol: "music", intent: "" },
-            { id: "SMS", parentId: "MsgRoot", offsetX: -0.6, offsetY: 0.5, offsetZ: -0.5, scale: 1.4, light: {r:0,g:130,b:230}, dark: {r:0,g:160,b:255}, symbol: "msg", intent: "intent://#Intent;scheme=root;package=com.google.android.apps.messaging;end" },
-            { id: "Torque", parentId: "DiagRoot", offsetX: -0.65, offsetY: -0.55, offsetZ: -0.5, scale: 1.4, light: {r:230,g:130,b:0}, dark: {r:255,g:160,b:0}, symbol: "play", intent: "intent://#Intent;scheme=root;package=com.owl.torque;end" }
+            { id: "GoogleMaps", parentId: "NavRoot", offsetX: -0.42, offsetY: 0.34, offsetZ: -0.36, scale: 1.7, light: {r:0,g:170,b:230}, dark: {r:0,g:200,b:255}, symbol: "nav", packageName: "com.google.android.apps.maps", intent: "intent://#Intent;scheme=geo;package=com.google.android.apps.maps;end", fallbackUrl: "https://www.google.com/maps" },
+            { id: "Waze", parentId: "NavRoot", offsetX: 0.48, offsetY: 0.25, offsetZ: 0.38, scale: 1.7, light: {r:30,g:200,b:240}, dark: {r:0,g:230,b:255}, symbol: "nav", packageName: "com.waze", intent: "intent://#Intent;scheme=waze;package=com.waze;end", fallbackUrl: "https://www.waze.com/livemap" },
+            { id: "Spotify", parentId: "MediaRoot", offsetX: -0.45, offsetY: -0.32, offsetZ: 0.36, scale: 1.7, light: {r:0,g:220,b:100}, dark: {r:0,g:255,b:120}, symbol: "music", packageName: "com.spotify.music", intent: "intent://#Intent;scheme=spotify;package=com.spotify.music;end", fallbackUrl: "https://open.spotify.com" },
+            { id: "YouTube", parentId: "MediaRoot", offsetX: 0.43, offsetY: -0.34, offsetZ: -0.38, scale: 1.7, light: {r:100,g:230,b:150}, dark: {r:130,g:255,b:180}, symbol: "play", packageName: "com.google.android.youtube", intent: "intent://#Intent;scheme=vnd.youtube;package=com.google.android.youtube;end", fallbackUrl: "https://www.youtube.com" },
+            { id: "RadioApp", parentId: "MediaRoot", offsetX: 0.12, offsetY: -0.7, offsetZ: 0.22, scale: 1.6, light: {r:0,g:210,b:180}, dark: {r:0,g:240,b:210}, symbol: "music", intent: "" },
+            { id: "SMS", parentId: "MsgRoot", offsetX: -0.42, offsetY: 0.38, offsetZ: -0.28, scale: 1.6, light: {r:0,g:130,b:230}, dark: {r:0,g:160,b:255}, symbol: "msg", packageName: "com.google.android.apps.messaging", intent: "intent://#Intent;scheme=sms;package=com.google.android.apps.messaging;end", fallbackUrl: "sms:" },
+            { id: "Torque", parentId: "DiagRoot", offsetX: -0.46, offsetY: -0.38, offsetZ: -0.26, scale: 1.6, light: {r:230,g:130,b:0}, dark: {r:255,g:160,b:0}, symbol: "play", packageName: "com.owl.torque", intent: "intent://#Intent;scheme=torque;package=com.owl.torque;end", fallbackUrl: "https://play.google.com/store/apps/details?id=com.owl.torque" }
         ];
 
         const glitchNode = { id: "GlitchRevert", baseAngle: 6.0, y: -2.3, scale: 2.2, light: {r:40,g:220,b:90}, dark: {r:50,g:255,b:50}, isGlitch: true, symbol: "warn", intent: "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end" };
-        const stage3Nodes = []; stage1Nodes.forEach(p => { for(let i=0; i<6; i++) { stage3Nodes.push({ parentId: p.id, offsetX: (Math.random() > 0.5 ? 2.2 : -2.2) + (Math.random()-0.5)*0.8, offsetY: (Math.random() > 0.5 ? 2.0 : -2.2) + (Math.random()-0.5)*0.8, offsetZ: (Math.random()-0.5)*2.5, scale: 0.8, light: {r:p.light.r+15, g:p.light.g, b:p.light.b}, dark: {r:p.dark.r, g:p.dark.g, b:p.dark.b} }); } });
+        const stage3Nodes = []; stage1Nodes.forEach(p => { for(let i=0; i<6; i++) { stage3Nodes.push({ parentId: p.id, offsetX: (Math.random() > 0.5 ? 1.2 : -1.2) + (Math.random()-0.5)*0.7, offsetY: (Math.random() > 0.5 ? 1.2 : -1.3) + (Math.random()-0.5)*0.8, offsetZ: (Math.random()-0.5)*1.6, scale: 0.9, light: {r:p.light.r+15, g:p.light.g, b:p.light.b}, dark: {r:p.dark.r, g:p.dark.g, b:p.dark.b} }); } });
         const decayParticles = []; for(let i=0; i<15; i++) { decayParticles.push({ orbitRadius: 0.7 + Math.random() * 0.7, angle: Math.random() * 6.28, speed: 0.015 + Math.random() * 0.02, size: 2.5 + Math.random() * 2.5 }); }
         let floatingPulse = 0; let cameraX = 0;
         function softenColor(c, bias = 24) {
@@ -181,16 +181,29 @@
                 const y1 = link.from.y;
                 const x2 = link.to.x;
                 const y2 = link.to.y;
+                const midX = (x1 + x2) * 0.5 + (Math.sin((x1 + y1 + x2 + y2) * 0.024) * 18);
+                const midY = (y1 + y2) * 0.5 + (Math.cos((x1 - y1 + x2 - y2) * 0.02) * 14);
                 const glow = ctx.createLinearGradient(x1, y1, x2, y2);
-                glow.addColorStop(0, `rgba(255,255,255,${link.alpha * 0.28})`);
-                glow.addColorStop(0.45, `rgba(150,230,255,${link.alpha * 0.34})`);
-                glow.addColorStop(1, `rgba(255,255,255,${link.alpha * 0.22})`);
-                ctx.lineWidth = link.tier === 2 ? 3.2 : 2.1;
+                glow.addColorStop(0, `rgba(255,255,255,${link.alpha * 0.26})`);
+                glow.addColorStop(0.45, `rgba(150,230,255,${link.alpha * 0.50})`);
+                glow.addColorStop(1, `rgba(255,255,255,${link.alpha * 0.24})`);
                 ctx.lineCap = 'round';
-                ctx.strokeStyle = glow;
+                ctx.lineJoin = 'round';
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
+                ctx.quadraticCurveTo(midX, midY, x2, y2);
+                ctx.lineWidth = link.tier === 2 ? 11 : 7.5;
+                ctx.shadowBlur = link.tier === 2 ? 12 : 8;
+                ctx.shadowColor = `rgba(137,214,255,${link.alpha * 0.55})`;
+                ctx.strokeStyle = glow;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.quadraticCurveTo(midX, midY, x2, y2);
+                ctx.lineWidth = link.tier === 2 ? 5.5 : 3.8;
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = `rgba(255,255,255,${link.alpha * 0.33})`;
                 ctx.stroke();
             });
             
@@ -223,7 +236,27 @@
         }
         window.addEventListener('touchmove', (e) => { if (e.touches && e.touches.length === 2) { let dx = e.touches[0].clientX - e.touches[1].clientX; let dy = e.touches[0].clientY - e.touches[1].clientY; let dist = Math.hypot(dx, dy); if (initialPinchDist === null) { initialPinchDist = dist; } else { let changeFactor = dist / initialPinchDist; currentBrightness = Math.min(1.0, Math.max(0.1, currentBrightness * (changeFactor > 1 ? 1.02 : 0.98))); } } });
         window.addEventListener('touchend', () => { initialPinchDist = null; });
-        function checkTapLocation(e) { const clientX = e.clientX || (e.touches && e.touches.clientX); const clientY = e.clientY || (e.touches && e.touches.clientY); if (!clientX || !clientY) return; const interactables = [...stage1Nodes, ...stage2Nodes, glitchNode]; for (let node of interactables) { if (!node.currentScreenX) continue; const distance = Math.hypot(clientX-node.currentScreenX, clientY-node.currentScreenY); if (distance <= node.currentRadius+18) { if (node.id === "GlitchRevert" || node.intent) { window.location.href = node.intent; } else { alert("Root Cluster Node Tapped."); } break; } } }
+        function launchNodeIntent(node) {
+            const target = node.intent || node.fallbackUrl;
+            if (!target) {
+                alert("App launch target is not configured.");
+                return;
+            }
+
+            try {
+                window.location.href = target;
+            } catch (error) {
+                console.warn("Intent launch failed for", node.id, error);
+            }
+
+            if (node.fallbackUrl && node.fallbackUrl.startsWith('http')) {
+                setTimeout(() => {
+                    if (document.hidden) return;
+                    window.location.href = node.fallbackUrl;
+                }, 800);
+            }
+        }
+        function checkTapLocation(e) { const clientX = e.clientX || (e.touches && e.touches.clientX); const clientY = e.clientY || (e.touches && e.touches.clientY); if (!clientX || !clientY) return; const interactables = [...stage1Nodes, ...stage2Nodes, glitchNode]; for (let node of interactables) { if (!node.currentScreenX) continue; const distance = Math.hypot(clientX-node.currentScreenX, clientY-node.currentScreenY); if (distance <= node.currentRadius+18) { if (node.id === "GlitchRevert") { launchNodeIntent(node); } else if (node.intent || node.fallbackUrl) { launchNodeIntent(node); } else { alert("Root Cluster Node Tapped."); } break; } } }
         window.addEventListener('click', checkTapLocation); window.addEventListener('touchstart', checkTapLocation); renderLoop();
     </script>
 </body>
