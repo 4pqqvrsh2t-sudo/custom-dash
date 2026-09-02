@@ -47,7 +47,13 @@
         const stage3Nodes = []; stage1Nodes.forEach(p => { for(let i=0; i<6; i++) { stage3Nodes.push({ parentId: p.id, offsetX: (Math.random() > 0.5 ? 2.2 : -2.2) + (Math.random()-0.5)*0.8, offsetY: (Math.random() > 0.5 ? 2.0 : -2.2) + (Math.random()-0.5)*0.8, offsetZ: (Math.random()-0.5)*2.5, scale: 0.8, light: {r:p.light.r+15, g:p.light.g, b:p.light.b}, dark: {r:p.dark.r, g:p.dark.g, b:p.dark.b} }); } });
         const decayParticles = []; for(let i=0; i<15; i++) { decayParticles.push({ orbitRadius: 0.7 + Math.random() * 0.7, angle: Math.random() * 6.28, speed: 0.015 + Math.random() * 0.02, size: 2.5 + Math.random() * 2.5 }); }
         let floatingPulse = 0; let cameraX = 0;
-        // HEAVILY BOOSTED SIZE RATIO SCALE HERE
+        function softenColor(c, bias = 24) {
+            return {
+                r: Math.min(255, c.r + bias),
+                g: Math.min(255, c.g + bias),
+                b: Math.min(255, c.b + bias)
+            };
+        }
         function project(x, y, z) { const fov = minScreenDim * 0.75; const screenX = x*fov/(z+12)+width/2; const screenY = y*fov/(z+12)+height/2; const size = (fov*0.19)/(z+12); return { x: screenX, y: screenY, size: size, depth: z }; }
         function drawEmbeddedSymbol(t, cx, cy, radius, alpha) {
             ctx.save(); ctx.strokeStyle = "rgba(255, 255, 255, "+(alpha*0.55)+")"; ctx.fillStyle = "rgba(255, 255, 255, "+(alpha*0.55)+")"; ctx.lineWidth = Math.max(2.5, radius*0.12); ctx.lineCap = "round"; ctx.lineJoin = "round"; const s = radius*0.35;
@@ -62,6 +68,65 @@
             else if (t === "plus") { ctx.beginPath(); ctx.moveTo(cx-s, cy); ctx.lineTo(cx+s, cy); ctx.moveTo(cx, cy-s); ctx.lineTo(cx, cy+s); ctx.stroke(); }
             else if (t === "warn") { ctx.beginPath(); ctx.moveTo(cx, cy-s*0.7); ctx.lineTo(cx+s, cy+s*0.7); ctx.lineTo(cx-s, cy+s*0.7); ctx.closePath(); ctx.stroke(); ctx.fillRect(cx-2, cy+s*0.3, 4, 4); }
             ctx.restore();
+        }
+        function drawGlassOrb(p, color, alpha, node) {
+            const base = softenColor(color, 18);
+            const glow = softenColor(color, 48);
+            const waveX = Math.sin(floatingPulse + (node.baseAngle || 0) + p.x3d * 0.6) * p.size * 0.22;
+            const waveY = Math.cos(floatingPulse * 1.4 + (node.y || 0) * 2.5 + p.z3d * 0.8) * p.size * 0.18;
+            const rimX = p.x - p.size * 0.42 + waveX;
+            const rimY = p.y - p.size * 0.48 + waveY;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.shadowColor = `rgba(${glow.r}, ${glow.g}, ${glow.b}, 0.22)`;
+            ctx.shadowBlur = p.size * 1.6;
+            ctx.fillStyle = `rgba(${base.r}, ${base.g}, ${base.b}, ${0.18 + alpha * 0.18})`;
+            ctx.fill();
+            ctx.restore();
+
+            const fillGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.12, p.x, p.y, p.size * 1.18);
+            fillGradient.addColorStop(0, `rgba(${glow.r}, ${glow.g}, ${glow.b}, ${0.32 + alpha * 0.24})`);
+            fillGradient.addColorStop(0.28, `rgba(${base.r}, ${base.g}, ${base.b}, ${0.18 + alpha * 0.22})`);
+            fillGradient.addColorStop(0.7, `rgba(255, 255, 255, ${0.06 + alpha * 0.08})`);
+            fillGradient.addColorStop(1, `rgba(17, 36, 46, ${0.1 + alpha * 0.08})`);
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = fillGradient;
+            ctx.fill();
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.clip();
+
+            const reflectionGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.12, rimX, rimY, p.size * 1.5);
+            reflectionGradient.addColorStop(0, `rgba(255,255,255,${0.7 * alpha})`);
+            reflectionGradient.addColorStop(0.22, `rgba(210,245,255,${0.28 * alpha})`);
+            reflectionGradient.addColorStop(0.5, `rgba(160,220,255,${0.12 * alpha})`);
+            reflectionGradient.addColorStop(1, 'rgba(255,255,255,0)');
+
+            ctx.fillStyle = reflectionGradient;
+            ctx.fillRect(p.x - p.size * 1.25, p.y - p.size * 1.25, p.size * 2.5, p.size * 2.5);
+
+            const sweep = ctx.createLinearGradient(p.x - p.size * 0.9, p.y - p.size * 0.8, p.x + p.size * 0.8, p.y + p.size * 0.7);
+            sweep.addColorStop(0, `rgba(255,255,255,${0.46 * alpha})`);
+            sweep.addColorStop(0.35, `rgba(255,255,255,${0.08 * alpha})`);
+            sweep.addColorStop(1, `rgba(255,255,255,0)`);
+            ctx.fillStyle = sweep;
+            ctx.beginPath();
+            ctx.arc(p.x + waveX * 0.8, p.y + waveY * 0.7, p.size * 0.82, Math.PI * 0.9, Math.PI * 1.8);
+            ctx.quadraticCurveTo(p.x + p.size * 0.6, p.y - p.size * 0.5, p.x - p.size * 0.25, p.y - p.size * 0.25);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.lineWidth = 1.1;
+            ctx.strokeStyle = `rgba(255,255,255,${0.18 + alpha * 0.2})`;
+            ctx.stroke();
         }
         function drawPerspectiveGrid() {
             ctx.save(); ctx.strokeStyle = isDarkMode ? "rgba(0, 240, 255, 0.045)" : "rgba(0, 140, 220, 0.055)"; ctx.lineWidth = 1.0; const gc = 24, gs = 2.0; const gridOffset = rotationAngle*1.5;
@@ -97,59 +162,62 @@
                 const pNode = computedMap[node.parentId]; if (!pNode) return; const rx = pNode.x+node.offsetX; const ry = pNode.y+node.offsetY+Math.cos(floatingPulse+node.offsetX)*0.04; const rz = pNode.z+node.offsetZ;
                 const p = project(rx, ry, rz); p.size *= node.scale; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 3 });
             });
+            const connectionLinks = [];
             allElementsToDraw.forEach(item => {
-                if (item.tier === 1 || !item.node.parentId) return; const parentProj = computedMap[item.node.parentId]; if (!parentProj) return; const avgDepth = (item.depth + parentProj.screen.depth) / 2; const alpha = Math.max(0.03, 1-(avgDepth+cylinderRadius)/(cylinderRadius*1.9));
-                ctx.lineWidth = item.tier === 2 ? 5.5 : 2.5; ctx.beginPath(); ctx.strokeStyle = isDarkMode ? `rgba(0, 240, 255, ${alpha*0.35})` : `rgba(0, 180, 245, ${alpha*0.4})`; ctx.moveTo(item.x, item.y); ctx.lineTo(parentProj.screen.x, parentProj.screen.y); ctx.stroke();
+                if (!item.node.parentId) return;
+                const parentProj = computedMap[item.node.parentId];
+                if (!parentProj) return;
+                const avgDepth = (item.depth + parentProj.screen.depth) / 2;
+                const alpha = Math.max(0.04, 1 - (avgDepth + cylinderRadius) / (cylinderRadius * 1.9));
+                connectionLinks.push({
+                    from: parentProj.screen,
+                    to: item,
+                    alpha,
+                    tier: item.tier
+                });
+            });
+            connectionLinks.forEach(link => {
+                const x1 = link.from.x;
+                const y1 = link.from.y;
+                const x2 = link.to.x;
+                const y2 = link.to.y;
+                const glow = ctx.createLinearGradient(x1, y1, x2, y2);
+                glow.addColorStop(0, `rgba(255,255,255,${link.alpha * 0.28})`);
+                glow.addColorStop(0.45, `rgba(150,230,255,${link.alpha * 0.34})`);
+                glow.addColorStop(1, `rgba(255,255,255,${link.alpha * 0.22})`);
+                ctx.lineWidth = link.tier === 2 ? 3.2 : 2.1;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = glow;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
             });
             
             const finalSortedDrawList = [...allElementsToDraw].sort((a, b) => b.depth - a.depth);
             finalSortedDrawList.forEach(p => {
-                if (p.size <= 0) return; const alpha = Math.max(0.12, 1-(p.depth+cylinderRadius)/(cylinderRadius*1.8));
+                if (p.size <= 0) return; const alpha = Math.max(0.16, 1-(p.depth+cylinderRadius)/(cylinderRadius*1.8));
                 const c = isDarkMode ? p.node.dark : p.node.light;
-                
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${p.tier === 3 ? alpha*0.95 : alpha*0.9})`; ctx.fill();
-                
-                const liquidGrad = ctx.createRadialGradient(p.x, p.y + p.size*0.4, p.size*0.1, p.x, p.y, p.size); liquidGrad.addColorStop(0, `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha*0.95})`); liquidGrad.addColorStop(0.5, `rgba(${Math.min(255, c.r+30)}, ${Math.min(255, c.g+30)}, ${Math.min(255, c.b+30)}, ${alpha*0.6})`); liquidGrad.addColorStop(1, isDarkMode ? "rgba(0,0,0,0.7)" : "rgba(255, 255, 255, 0.2)"); ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fillStyle = liquidGrad; ctx.fill();
-                
-                let refX = (p.x3d / cylinderRadius) * p.size * 0.22 + (spinVelocity * p.size * 0.05);
-                let refY = (p.depth / cylinderRadius) * p.size * 0.12;
-                
-                ctx.save(); ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.clip();
-                const specularGrad = ctx.createLinearGradient(p.x - p.size*0.5 + refX, p.y - p.size*0.5 + refY, p.x, p.y + p.size*0.2);
-                specularGrad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.85})`); specularGrad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.1})`); specularGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
-                
-                ctx.beginPath(); ctx.arc(p.x - p.size*0.1 + refX, p.y - p.size*0.1 + refY, p.size * 0.85, Math.PI * 0.9, Math.PI * 1.85);
-                ctx.quadraticCurveTo(p.x + p.size*0.4 + refX, p.y - p.size*0.3 + refY, p.x - p.size*0.1 + refX, p.y - p.size*0.1 + refY);
-                ctx.fillStyle = specularGrad; ctx.fill(); ctx.restore();
+                const softC = softenColor(c, 18);
+                drawGlassOrb(p, softC, alpha, p.node);
 
-        if (p.node.isGlitch) {
-            // 1. Solid Fluid Glass Base: Stays steady green with zero red/blue splitting phases
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fillStyle = liquidGrad; ctx.fill();
-
-            // 2. Slower Full-Coverage Scatter Swarm (Paced down to a calm, relaxed tempo)
-            let glitchTick = Math.floor(floatingPulse * 6); // Set to 6 for a smooth, slow update speed
-            for (let i = 0; i < 6; i++) {
-                let segmentSeed = Math.sin(glitchTick * 12.7 + i * 93.4);
-                let checkSeed = Math.cos(glitchTick * 34.2 - i * 57.1);
-                
-                if (checkSeed > 0.1) {
-                    // Uses clean electric cyan and pure white overlay dashes to match your image beautifully
-                    ctx.fillStyle = ["#00f0ff", "#ffffff"][Math.abs(Math.floor(segmentSeed * 100)) % 2];
-                    
-                    let scatterX = p.x + Math.sin(glitchTick * 74.2 + i * 15.3) * p.size * 0.8;
-                    let scatterY = p.y + Math.cos(glitchTick * 29.5 + i * 62.8) * p.size * 0.8;
-                    let dashWidth = 5 + Math.abs(Math.floor(segmentSeed * 1234)) % 10;
-                    
-                    ctx.fillRect(scatterX, scatterY, dashWidth, 1.5);
+                if (p.node.isGlitch) {
+                    let glitchTick = Math.floor(floatingPulse * 6);
+                    for (let i = 0; i < 6; i++) {
+                        let segmentSeed = Math.sin(glitchTick * 12.7 + i * 93.4);
+                        let checkSeed = Math.cos(glitchTick * 34.2 - i * 57.1);
+                        if (checkSeed > 0.1) {
+                            ctx.fillStyle = ["#00f0ff", "#ffffff"][Math.abs(Math.floor(segmentSeed * 100)) % 2];
+                            let scatterX = p.x + Math.sin(glitchTick * 74.2 + i * 15.3) * p.size * 0.8;
+                            let scatterY = p.y + Math.cos(glitchTick * 29.5 + i * 62.8) * p.size * 0.8;
+                            let dashWidth = 6 + Math.abs(Math.floor(segmentSeed * 1234)) % 11;
+                            ctx.fillRect(scatterX, scatterY, dashWidth, 1.6);
+                        }
+                    }
                 }
-            }
-        } else {
-            // Standard menus remain completely untouched and pristine
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fillStyle = liquidGrad; ctx.fill();
-        }
 
-
-                if (p.node.symbol) { drawEmbeddedSymbol(p.node.symbol, p.x, p.y, p.size, alpha); } p.node.currentScreenX = p.x; p.node.currentScreenY = p.y; p.node.currentRadius = p.size;
+                if (p.node.symbol) { drawEmbeddedSymbol(p.node.symbol, p.x, p.y, p.size, alpha); }
+                p.node.currentScreenX = p.x; p.node.currentScreenY = p.y; p.node.currentRadius = p.size;
             });
             ctx.fillStyle = `rgba(0, 0, 0, ${1.0 - currentBrightness})`; ctx.fillRect(0, 0, width, height); requestAnimationFrame(renderLoop);
         }
