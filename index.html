@@ -10,10 +10,10 @@
         #slider-container { position:absolute; bottom:25px; left:30%; width:40%; height:6px; background:rgba(0,0,0,0.08); border-radius:3px; }
         #slider { -webkit-appearance:none; appearance:none; width:100%; height:100%; background:transparent; margin:0; outline:none; cursor:pointer; }
         #slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:14px; height:14px; border-radius:50%; background:rgba(0,180,255,0.6); }
-        #settings-toggle { position:absolute; top:18px; right:20px; z-index:30; border:none; border-radius:999px; background:rgba(17,21,28,0.72); color:#eaf7ff; padding:10px 16px; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; }
+        #settings-toggle { display:none; }
         #settings-overlay { position:fixed; inset:0; background:rgba(7,10,14,0.52); display:flex; align-items:center; justify-content:center; z-index:40; opacity:0; pointer-events:none; transition:opacity 0.2s ease; }
         #settings-overlay.visible { opacity:1; pointer-events:auto; }
-        #settings-panel { width:min(460px, calc(100vw - 32px)); background:rgba(15,18,22,0.9); border:1px solid rgba(255,255,255,0.15); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,0.38); padding:18px 18px 12px; }
+        #settings-panel { width:min(520px, calc(100vw - 32px)); max-height:90vh; overflow:auto; background:rgba(15,18,22,0.92); border:1px solid rgba(255,255,255,0.15); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,0.38); padding:18px 18px 12px; }
         .settings-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
         .settings-header h2 { margin:0; color:#edf5ff; font-size:18px; }
         .close-btn { border:none; border-radius:10px; background:rgba(255,255,255,0.08); color:#edf5ff; padding:7px 10px; cursor:pointer; }
@@ -22,15 +22,24 @@
         .setting label { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#d8e9ff; margin-bottom:8px; }
         .setting output { color:#8ed8ff; font-weight:600; }
         .setting input[type="range"] { width:100%; accent-color:#69d8ff; }
-        .settings-actions { display:flex; justify-content:flex-end; margin-top:14px; }
-        .settings-actions button { border:none; border-radius:10px; padding:10px 14px; cursor:pointer; }
+        .settings-section { margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08); }
+        .settings-section h3 { margin:0 0 10px; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:#9ad7ff; }
+        .layout-controls, .node-controls, .theme-controls { display:grid; gap:8px; }
+        .stack-row { display:flex; gap:8px; flex-wrap:wrap; }
+        .settings-input, .settings-select { width:100%; border:none; border-radius:10px; background:rgba(255,255,255,0.06); color:#edf5ff; padding:10px 12px; }
+        .settings-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+        .settings-actions button, .settings-section button { border:none; border-radius:10px; padding:10px 14px; cursor:pointer; }
         .primary-btn { background:#69d8ff; color:#06131b; font-weight:700; }
-        .secondary-btn { background:rgba(255,255,255,0.06); color:#edf5ff; margin-right:8px; }
-        @media (max-width: 520px) { .settings-grid { grid-template-columns:1fr; } }
+        .secondary-btn { background:rgba(255,255,255,0.06); color:#edf5ff; }
+        .theme-grid { display:grid; grid-template-columns:repeat(2, minmax(120px, 1fr)); gap:8px; }
+        .theme-card { border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:rgba(255,255,255,0.03); color:#edf5ff; padding:8px 10px; text-align:left; cursor:pointer; }
+        .theme-card.is-active { border-color:#69d8ff; box-shadow:0 0 0 1px rgba(105,216,255,0.6); }
+        .theme-swatch { height:16px; border-radius:999px; margin-bottom:6px; }
+        .theme-name { font-size:12px; font-weight:600; }
+        @media (max-width: 520px) { .settings-grid, .theme-grid { grid-template-columns:1fr; } }
     </style>
 </head>
 <body>
-    <button id="settings-toggle" type="button">Cluster Settings</button>
     <div id="settings-overlay" aria-hidden="true">
         <div id="settings-panel" role="dialog" aria-modal="true" aria-label="Cluster settings">
             <div class="settings-header">
@@ -45,6 +54,40 @@
                 <div class="setting"><label for="clusterAlphaInput"><span>Cluster opacity</span><output id="clusterAlphaValue">0.55</output></label><input id="clusterAlphaInput" type="range" min="0.2" max="1.0" step="0.05" value="0.55"></div>
                 <div class="setting"><label for="lineWeightInput"><span>Line weight</span><output id="lineWeightValue">1.0</output></label><input id="lineWeightInput" type="range" min="0.5" max="2.5" step="0.1" value="1.0"></div>
             </div>
+
+            <div class="settings-section">
+                <h3>Layout Presets</h3>
+                <div class="layout-controls">
+                    <input id="layoutPresetName" class="settings-input" type="text" placeholder="Preset name" maxlength="24">
+                    <div class="stack-row">
+                        <button id="save-layout-preset" class="secondary-btn" type="button">Save Layout</button>
+                        <button id="reset-layout-move" class="secondary-btn" type="button">Reset Layout</button>
+                    </div>
+                    <select id="layoutPresetSelect" class="settings-select"></select>
+                    <div class="stack-row">
+                        <button id="apply-layout-preset" class="primary-btn" type="button">Apply Preset</button>
+                        <button id="delete-layout-preset" class="secondary-btn" type="button">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Add Cluster Nodes</h3>
+                <div class="node-controls">
+                    <select id="newNodeParentSelect" class="settings-select"></select>
+                    <select id="newNodeStageSelect" class="settings-select">
+                        <option value="stage2">Stage 2</option>
+                        <option value="stage3">Stage 3</option>
+                    </select>
+                    <button id="add-cluster-node" class="primary-btn" type="button">Add Node</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Palette Themes</h3>
+                <div id="palette-theme-grid" class="theme-grid"></div>
+            </div>
+
             <div class="settings-actions">
                 <button id="reset-settings" class="secondary-btn" type="button">Reset</button>
                 <button id="apply-settings" class="primary-btn" type="button">Apply</button>
@@ -63,15 +106,135 @@
         let rotationAngle = 0, lastRotationAngle = 0, spinVelocity = 0;
         const slider = document.getElementById('slider'); slider.addEventListener('input', (e) => { rotationAngle = parseFloat(e.target.value); });
         let initialPinchDist = null, currentBrightness = 1.0, isDarkMode = false;
+        let dragState = null;
         const clusterSettingsKey = 'blank-cluster-settings';
+        const layoutPresetsKey = 'blank-cluster-layout-presets';
+        const paletteThemeKey = 'blank-cluster-theme';
         const defaultClusterSettings = { centerRadius: 4.5, rootScale: 2.2, stage1To2: 1.0, stage2To3: 1.8, clusterAlpha: 0.55, lineWeight: 1.0 };
+        const paletteThemes = [
+            { id: 'aurora', name: 'Aurora', rootColors: [[20,180,240],[38,214,160],[122,116,255],[255,170,90]], accent: '#8fe7ff' },
+            { id: 'sunset', name: 'Sunset Bloom', rootColors: [[255,122,83],[255,165,78],[255,194,103],[157,98,255]], accent: '#ffd59e' },
+            { id: 'violet', name: 'Violet Night', rootColors: [[118,92,255],[168,102,255],[75,165,255],[61,205,218]], accent: '#d9c7ff' },
+            { id: 'forest', name: 'Forest Mist', rootColors: [[58,154,118],[34,197,136],[118,176,127],[144,214,180]], accent: '#d8ffe7' },
+            { id: 'mono', name: 'Ice Steel', rootColors: [[121,142,168],[160,175,195],[205,218,236],[79,90,110]], accent: '#edf7ff' }
+        ];
         let clusterSettings = { ...defaultClusterSettings };
         let cylinderRadius = clusterSettings.centerRadius;
+        let layoutPresets = [];
+        let activeThemeId = 'aurora';
         function loadClusterSettings() { try { const saved = JSON.parse(localStorage.getItem(clusterSettingsKey) || '{}'); clusterSettings = { ...defaultClusterSettings, ...saved }; } catch (e) { clusterSettings = { ...defaultClusterSettings }; } cylinderRadius = clusterSettings.centerRadius; }
         function saveClusterSettings() { localStorage.setItem(clusterSettingsKey, JSON.stringify(clusterSettings)); }
+        function loadLayoutPresets() { try { const saved = JSON.parse(localStorage.getItem(layoutPresetsKey) || '[]'); layoutPresets = Array.isArray(saved) ? saved : []; } catch (e) { layoutPresets = []; } }
+        function saveLayoutPresets() { localStorage.setItem(layoutPresetsKey, JSON.stringify(layoutPresets)); }
+        function loadSavedTheme() { try { const saved = localStorage.getItem(paletteThemeKey); if (saved) activeThemeId = saved; } catch (e) { activeThemeId = 'aurora'; } }
+        function saveSavedTheme() { localStorage.setItem(paletteThemeKey, activeThemeId); }
         function syncSettingsControls() { document.getElementById('centerRadiusInput').value = clusterSettings.centerRadius; document.getElementById('rootScaleInput').value = clusterSettings.rootScale; document.getElementById('stage1To2Input').value = clusterSettings.stage1To2; document.getElementById('stage2To3Input').value = clusterSettings.stage2To3; document.getElementById('clusterAlphaInput').value = clusterSettings.clusterAlpha; document.getElementById('lineWeightInput').value = clusterSettings.lineWeight; document.getElementById('centerRadiusValue').textContent = clusterSettings.centerRadius.toFixed(1); document.getElementById('rootScaleValue').textContent = clusterSettings.rootScale.toFixed(1); document.getElementById('stage1To2Value').textContent = clusterSettings.stage1To2.toFixed(1); document.getElementById('stage2To3Value').textContent = clusterSettings.stage2To3.toFixed(2); document.getElementById('clusterAlphaValue').textContent = clusterSettings.clusterAlpha.toFixed(2); document.getElementById('lineWeightValue').textContent = clusterSettings.lineWeight.toFixed(1); }
         function applySettingsFromInputs() { clusterSettings.centerRadius = Number(document.getElementById('centerRadiusInput').value); clusterSettings.rootScale = Number(document.getElementById('rootScaleInput').value); clusterSettings.stage1To2 = Number(document.getElementById('stage1To2Input').value); clusterSettings.stage2To3 = Number(document.getElementById('stage2To3Input').value); clusterSettings.clusterAlpha = Number(document.getElementById('clusterAlphaInput').value); clusterSettings.lineWeight = Number(document.getElementById('lineWeightInput').value); cylinderRadius = clusterSettings.centerRadius; saveClusterSettings(); syncSettingsControls(); }
+        function buildParentOptions() { const parentSelect = document.getElementById('newNodeParentSelect'); const current = parentSelect.value || 'NavRoot'; parentSelect.innerHTML = stage1Nodes.map(node => `<option value="${node.id}">${node.id.replace('Root','')}</option>`).join(''); parentSelect.value = current; }
+        function buildPaletteButtons() { const grid = document.getElementById('palette-theme-grid'); grid.innerHTML = paletteThemes.map(theme => { const swatches = theme.rootColors.map(color => `rgb(${color.join(',')})`).join(', '); return `<button type="button" class="theme-card ${theme.id === activeThemeId ? 'is-active' : ''}" data-theme-id="${theme.id}"><div class="theme-swatch" style="background:linear-gradient(90deg, ${swatches});"></div><div class="theme-name">${theme.name}</div></button>`; }).join(''); grid.querySelectorAll('.theme-card').forEach(card => { card.addEventListener('click', () => { activeThemeId = card.dataset.themeId; saveSavedTheme(); applyTheme(activeThemeId); renderPaletteButtons(); }); }); }
+        function renderPaletteButtons() { buildPaletteButtons(); }
+        function applyTheme(themeId) {
+            const theme = paletteThemes.find(item => item.id === themeId) || paletteThemes[0];
+            activeThemeId = theme.id;
+            stage1Nodes.forEach((node, idx) => { const color = theme.rootColors[idx % theme.rootColors.length]; node.light = { r: color[0], g: color[1], b: color[2] }; node.dark = { r: Math.min(255, color[0] + 30), g: Math.min(255, color[1] + 30), b: Math.min(255, color[2] + 30) }; });
+            stage2Nodes.forEach(node => {
+                const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
+                const tone = theme.rootColors[(Math.abs(node.offsetX) * 10 + Math.abs(node.offsetY) * 8) % theme.rootColors.length];
+                node.light = { r: Math.max(20, tone[0] - 10), g: Math.max(20, tone[1] - 10), b: Math.max(20, tone[2] - 10) };
+                node.dark = { r: Math.min(255, tone[0] + 30), g: Math.min(255, tone[1] + 30), b: Math.min(255, tone[2] + 30) };
+            });
+            stage3Nodes.forEach(node => {
+                const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
+                const tone = theme.rootColors[(Math.abs(node.offsetX) * 7 + Math.abs(node.offsetY) * 9 + 1) % theme.rootColors.length];
+                node.light = { r: Math.max(20, tone[0] - 20), g: Math.max(20, tone[1] - 20), b: Math.max(20, tone[2] - 20) };
+                node.dark = { r: Math.min(255, tone[0] + 25), g: Math.min(255, tone[1] + 25), b: Math.min(255, tone[2] + 25) };
+            });
+            saveSavedTheme();
+        }
+        function syncLayoutPresetList() { const select = document.getElementById('layoutPresetSelect'); if (!select) return; select.innerHTML = layoutPresets.length ? layoutPresets.map(p => `<option value="${p.name}">${p.name}</option>`).join('') : '<option value="">No presets saved</option>'; }
+        function cloneNodeState(node) { return { id: node.id, parentId: node.parentId || null, offsetX: Number(node.targetOffsetX ?? node.offsetX ?? 0), offsetY: Number(node.targetOffsetY ?? node.offsetY ?? 0), offsetZ: Number(node.targetOffsetZ ?? node.offsetZ ?? 0), scale: Number(node.scale || 1) }; }
+        function snapshotCurrentLayout() {
+            return {
+                stage2: stage2Nodes.map(cloneNodeState),
+                stage3: stage3Nodes.map(cloneNodeState)
+            };
+        }
+        function saveCurrentLayoutPreset() {
+            const input = document.getElementById('layoutPresetName');
+            const name = (input.value || '').trim() || `Preset ${layoutPresets.length + 1}`;
+            const preset = { name, ...snapshotCurrentLayout() };
+            const index = layoutPresets.findIndex(item => item.name === name);
+            if (index >= 0) layoutPresets[index] = preset; else layoutPresets.push(preset);
+            input.value = name;
+            saveLayoutPresets();
+            syncLayoutPresetList();
+        }
+        function applyLayoutPreset(name) {
+            const preset = layoutPresets.find(item => item.name === name);
+            if (!preset) return;
+            const applyList = (nodes, savedNodes) => {
+                savedNodes.forEach(saved => {
+                    const target = nodes.find(node => node.id === saved.id || (node.parentId === saved.parentId && node.offsetX === saved.offsetX && node.offsetY === saved.offsetY));
+                    if (!target) return;
+                    target.targetOffsetX = Number(saved.offsetX || 0);
+                    target.targetOffsetY = Number(saved.offsetY || 0);
+                    target.targetOffsetZ = Number(saved.offsetZ || 0);
+                    target.targetScale = Number(saved.scale || target.scale || 1);
+                });
+            };
+            applyList(stage2Nodes, preset.stage2 || []);
+            applyList(stage3Nodes, preset.stage3 || []);
+        }
+        function resetLayoutPositions() {
+            stage2Nodes.forEach(node => {
+                node.targetOffsetX = node.offsetX;
+                node.targetOffsetY = node.offsetY;
+                node.targetOffsetZ = node.offsetZ;
+            });
+            stage3Nodes.forEach(node => {
+                node.targetOffsetX = node.offsetX;
+                node.targetOffsetY = node.offsetY;
+                node.targetOffsetZ = node.offsetZ;
+            });
+        }
+        function deleteSelectedLayoutPreset() {
+            const select = document.getElementById('layoutPresetSelect');
+            const name = select.value;
+            if (!name || !layoutPresets.length) return;
+            layoutPresets = layoutPresets.filter(item => item.name !== name);
+            saveLayoutPresets();
+            syncLayoutPresetList();
+        }
+        function addCustomNode() {
+            const parentId = document.getElementById('newNodeParentSelect').value;
+            const stage = document.getElementById('newNodeStageSelect').value;
+            const source = stage1Nodes.find(root => root.id === parentId) || stage1Nodes[0];
+            const baseId = `${source.id}${stage === 'stage2' ? 'Custom' : 'Leaf'}${Date.now().toString().slice(-3)}`;
+            const node = {
+                id: baseId,
+                parentId: source.id,
+                offsetX: stage === 'stage2' ? -1.2 + Math.random() * 2.4 : (Math.random() > 0.5 ? -1.8 : 1.8),
+                offsetY: stage === 'stage2' ? -1.1 + Math.random() * 2.2 : (Math.random() > 0.5 ? -1.8 : 1.8),
+                offsetZ: stage === 'stage2' ? -0.6 + Math.random() * 1.2 : (Math.random() > 0.5 ? -1.0 : 1.0),
+                scale: stage === 'stage2' ? 1.2 : 0.8,
+                symbol: stage === 'stage2' ? 'plus' : 'bubble',
+                light: { r: source.light.r + 10, g: source.light.g + 10, b: source.light.b + 10 },
+                dark: { r: source.dark.r + 10, g: source.dark.g + 10, b: source.dark.b + 10 },
+                targetOffsetX: 0,
+                targetOffsetY: 0,
+                targetOffsetZ: 0
+            };
+            if (stage === 'stage2') {
+                node.targetOffsetX = node.offsetX; node.targetOffsetY = node.offsetY; node.targetOffsetZ = node.offsetZ;
+                stage2Nodes.push(node);
+            } else {
+                node.targetOffsetX = node.offsetX; node.targetOffsetY = node.offsetY; node.targetOffsetZ = node.offsetZ;
+                stage3Nodes.push(node);
+            }
+        }
         loadClusterSettings();
+        loadLayoutPresets();
+        loadSavedTheme();
         const stage1Nodes = [
             { id: "NavRoot", baseAngle: 0.0, y: -1.2, scale: 2.2, light: {r:0,g:190,b:240}, dark: {r:0,g:240,b:255}, symbol: "map" },
             { id: "MediaRoot", baseAngle: 1.45, y: 1.0, scale: 2.2, light: {r:0,g:230,b:120}, dark: {r:0,g:255,b:100}, symbol: "disc" },
@@ -126,6 +289,16 @@
             }
             ctx.restore();
         }
+        function animateClusterNodes() {
+            [...stage2Nodes, ...stage3Nodes].forEach(node => {
+                node.offsetX = (node.offsetX ?? 0) + ((node.targetOffsetX ?? node.offsetX ?? 0) - (node.offsetX ?? 0)) * 0.12;
+                node.offsetY = (node.offsetY ?? 0) + ((node.targetOffsetY ?? node.offsetY ?? 0) - (node.offsetY ?? 0)) * 0.12;
+                node.offsetZ = (node.offsetZ ?? 0) + ((node.targetOffsetZ ?? node.offsetZ ?? 0) - (node.offsetZ ?? 0)) * 0.12;
+                if (!node.targetOffsetX && node.targetOffsetX !== 0) node.targetOffsetX = node.offsetX;
+                if (!node.targetOffsetY && node.targetOffsetY !== 0) node.targetOffsetY = node.offsetY;
+                if (!node.targetOffsetZ && node.targetOffsetZ !== 0) node.targetOffsetZ = node.offsetZ;
+            });
+        }
         function renderLoop() {
             isDarkMode = (currentBrightness < 0.4); ctx.fillStyle = isDarkMode ? '#0d1117' : '#f2f5f8'; ctx.fillRect(0, 0, width, height); floatingPulse += 0.012;
             spinVelocity = (rotationAngle - lastRotationAngle) * 20; if(Math.abs(spinVelocity) > 3) spinVelocity = Math.sign(spinVelocity)*3; lastRotationAngle = rotationAngle;
@@ -138,6 +311,7 @@
         
                 const p = project(rx, ry, rz); p.size *= node.scale; computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p }; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 1 });
             });
+            animateClusterNodes();
             stage2Nodes.forEach(node => {
                 const pNode = computedMap[node.parentId]; if (!pNode) return; const rx = pNode.x+node.offsetX*clusterSettings.stage1To2; const ry = pNode.y+node.offsetY*clusterSettings.stage1To2+Math.sin(floatingPulse*1.5+node.offsetX)*0.05; const rz = pNode.z+node.offsetZ*clusterSettings.stage1To2;
                 const p = project(rx, ry, rz); p.size *= node.scale * (clusterSettings.rootScale / 2.2); computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p }; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 2 });
@@ -204,15 +378,73 @@
         }
         window.addEventListener('touchmove', (e) => { if (e.touches && e.touches.length === 2) { let dx = e.touches[0].clientX - e.touches[1].clientX; let dy = e.touches[0].clientY - e.touches[1].clientY; let dist = Math.hypot(dx, dy); if (initialPinchDist === null) { initialPinchDist = dist; } else { let changeFactor = dist / initialPinchDist; currentBrightness = Math.min(1.0, Math.max(0.1, currentBrightness * (changeFactor > 1 ? 1.02 : 0.98))); } } });
         window.addEventListener('touchend', () => { initialPinchDist = null; });
-        function checkTapLocation(e) { const clientX = e.clientX || (e.touches && e.touches.clientX); const clientY = e.clientY || (e.touches && e.touches.clientY); if (!clientX || !clientY) return; const interactables = [...stage1Nodes, ...stage2Nodes, glitchNode]; for (let node of interactables) { if (!node.currentScreenX) continue; const distance = Math.hypot(clientX-node.currentScreenX, clientY-node.currentScreenY); if (distance <= node.currentRadius+18) { if (node.id === "GlitchRevert" || node.intent) { window.location.href = node.intent; } else { alert("Root Cluster Node Tapped."); } break; } } }
+        function getNodeAtPointer(clientX, clientY) {
+            const interactables = [...stage1Nodes, ...stage2Nodes, ...stage3Nodes, glitchNode];
+            let hit = null;
+            for (let node of interactables) {
+                if (!node.currentScreenX) continue;
+                const distance = Math.hypot(clientX - node.currentScreenX, clientY - node.currentScreenY);
+                if (distance <= (node.currentRadius || 20) + 18) {
+                    hit = node; break;
+                }
+            }
+            return hit;
+        }
+        function checkTapLocation(e) { const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX); const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY); if (!clientX || !clientY) return; const targetNode = getNodeAtPointer(clientX, clientY); if (!targetNode) return; if (targetNode.id === 'Settings') { openSettingsPanel('settings'); return; }
+            if (targetNode.id === 'Palettes') { openSettingsPanel('palette'); return; }
+            if (targetNode.id === 'GlitchRevert' || targetNode.intent) { window.location.href = targetNode.intent; return; }
+            alert('Root Cluster Node Tapped.');
+        }
+        window.addEventListener('pointerdown', (e) => {
+            const clientX = e.clientX; const clientY = e.clientY; const targetNode = getNodeAtPointer(clientX, clientY);
+            if (!targetNode || targetNode.id === 'Settings' || targetNode.id === 'Palettes' || targetNode.id === 'GlitchRevert' || targetNode.parentId === undefined) return;
+            dragState = { node: targetNode, startX: clientX, startY: clientY, offsetX: targetNode.targetOffsetX ?? targetNode.offsetX ?? 0, offsetY: targetNode.targetOffsetY ?? targetNode.offsetY ?? 0, offsetZ: targetNode.targetOffsetZ ?? targetNode.offsetZ ?? 0 };
+        });
+        window.addEventListener('pointermove', (e) => {
+            if (!dragState) return;
+            const dx = e.clientX - dragState.startX;
+            const dy = e.clientY - dragState.startY;
+            const node = dragState.node;
+            node.targetOffsetX = dragState.offsetX + dx * 0.008;
+            node.targetOffsetY = dragState.offsetY - dy * 0.008;
+            node.targetOffsetZ = dragState.offsetZ + (Math.abs(dx) + Math.abs(dy)) * 0.0015;
+            node.offsetX = node.targetOffsetX;
+            node.offsetY = node.targetOffsetY;
+            node.offsetZ = node.targetOffsetZ;
+        });
+        window.addEventListener('pointerup', () => { dragState = null; });
+        window.addEventListener('pointerleave', () => { dragState = null; });
         window.addEventListener('click', checkTapLocation); window.addEventListener('touchstart', checkTapLocation);
-        const settingsToggle = document.getElementById('settings-toggle'); const settingsOverlay = document.getElementById('settings-overlay'); const closeSettings = document.getElementById('close-settings'); const applySettings = document.getElementById('apply-settings'); const resetSettings = document.getElementById('reset-settings');
-        settingsToggle.addEventListener('click', () => { settingsOverlay.classList.add('visible'); settingsOverlay.setAttribute('aria-hidden', 'false'); syncSettingsControls(); });
-        closeSettings.addEventListener('click', () => { settingsOverlay.classList.remove('visible'); settingsOverlay.setAttribute('aria-hidden', 'true'); });
-        settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) { settingsOverlay.classList.remove('visible'); settingsOverlay.setAttribute('aria-hidden', 'true'); } });
-        applySettings.addEventListener('click', () => { applySettingsFromInputs(); settingsOverlay.classList.remove('visible'); });
+        const settingsOverlay = document.getElementById('settings-overlay'); const closeSettings = document.getElementById('close-settings'); const applySettings = document.getElementById('apply-settings'); const resetSettings = document.getElementById('reset-settings');
+        function openSettingsPanel(tab = 'settings') {
+            settingsOverlay.classList.add('visible');
+            settingsOverlay.setAttribute('aria-hidden', 'false');
+            syncSettingsControls();
+            if (tab === 'palette') {
+                const grid = document.getElementById('palette-theme-grid');
+                if (grid) {
+                    grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    grid.animate({ transform: ['scale(0.98)', 'scale(1)'] }, { duration: 220, easing: 'ease-out' });
+                }
+            }
+        }
+        function closeSettingsPanel() {
+            settingsOverlay.classList.remove('visible');
+            settingsOverlay.setAttribute('aria-hidden', 'true');
+        }
+        closeSettings.addEventListener('click', closeSettingsPanel);
+        settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) closeSettingsPanel(); });
+        applySettings.addEventListener('click', () => { applySettingsFromInputs(); closeSettingsPanel(); });
         resetSettings.addEventListener('click', () => { clusterSettings = { ...defaultClusterSettings }; cylinderRadius = clusterSettings.centerRadius; saveClusterSettings(); syncSettingsControls(); });
+        document.getElementById('save-layout-preset').addEventListener('click', saveCurrentLayoutPreset);
+        document.getElementById('apply-layout-preset').addEventListener('click', () => { const select = document.getElementById('layoutPresetSelect'); if (select.value) applyLayoutPreset(select.value); });
+        document.getElementById('delete-layout-preset').addEventListener('click', deleteSelectedLayoutPreset);
+        document.getElementById('reset-layout-move').addEventListener('click', resetLayoutPositions);
+        document.getElementById('add-cluster-node').addEventListener('click', () => { addCustomNode(); buildParentOptions(); });
         ['centerRadiusInput','rootScaleInput','stage1To2Input','stage2To3Input','clusterAlphaInput','lineWeightInput'].forEach(id => { document.getElementById(id).addEventListener('input', () => { applySettingsFromInputs(); }); });
+        buildParentOptions();
+        syncLayoutPresetList();
+        renderPaletteButtons();
         syncSettingsControls(); renderLoop();
     </script>
 </body>
