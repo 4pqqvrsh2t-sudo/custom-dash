@@ -33,26 +33,26 @@
         const cylinderRadius = 3.8;
 
         const stage1Nodes = [
-            { id: "NavRoot", baseAngle: 0.0, y: -1.00, scale: 1.7, light: {r:0,g:190,b:240}, dark: {r:0,g:240,b:255}, symbol: "map" },
-            { id: "MediaRoot", baseAngle: 1.45, y: 0.75, scale: 1.7, light: {r:0,g:230,b:120}, dark: {r:0,g:255,b:100}, symbol: "disc" },
-            { id: "MsgRoot", baseAngle: 2.9, y: -0.65, scale: 1.7, light: {r:0,g:150,b:245}, dark: {r:50,g:180,b:255}, symbol: "bubble" },
-            { id: "DiagRoot", baseAngle: 4.15, y: 0.95, scale: 1.7, light: {r:240,g:170,b:30}, dark: {r:255,g:130,b:0}, symbol: "gauge" }
+            { id: "NavRoot", baseAngle: 0.0, y: -1.00, scale: 2.1, light: {r:0,g:190,b:240}, dark: {r:0,g:240,b:255}, symbol: "map" },
+            { id: "MediaRoot", baseAngle: 1.45, y: 0.75, scale: 2.1, light: {r:0,g:230,b:120}, dark: {r:0,g:255,b:100}, symbol: "disc" },
+            { id: "MsgRoot", baseAngle: 2.9, y: -0.65, scale: 2.1, light: {r:0,g:150,b:245}, dark: {r:50,g:180,b:255}, symbol: "bubble" },
+            { id: "DiagRoot", baseAngle: 4.15, y: 0.95, scale: 2.1, light: {r:240,g:170,b:30}, dark: {r:255,g:130,b:0}, symbol: "gauge" }
         ];
 
         const stage2Nodes = [
-            { id: "GoogleMaps", parentId: "NavRoot", offsetX: -0.58, offsetY: 0.34, offsetZ: -0.28, scale: 1.4, light: {r:0,g:170,b:230}, dark: {r:0,g:200,b:255}, symbol: "nav", packageName: "com.google.android.apps.maps", intent: "intent://#Intent;scheme=geo;package=com.google.android.apps.maps;end", fallbackUrl: "https://www.google.com/maps" },
-            { id: "Waze", parentId: "NavRoot", offsetX: 0.64, offsetY: 0.22, offsetZ: 0.28, scale: 1.4, light: {r:30,g:200,b:240}, dark: {r:0,g:230,b:255}, symbol: "nav", packageName: "com.waze", intent: "intent://#Intent;scheme=waze;package=com.waze;end", fallbackUrl: "https://www.waze.com/livemap" },
-            { id: "Spotify", parentId: "MediaRoot", offsetX: -0.56, offsetY: -0.32, offsetZ: 0.24, scale: 1.4, light: {r:0,g:220,b:100}, dark: {r:0,g:255,b:120}, symbol: "music", packageName: "com.spotify.music", intent: "intent://#Intent;scheme=spotify;package=com.spotify.music;end", fallbackUrl: "https://open.spotify.com" },
-            { id: "YouTube", parentId: "MediaRoot", offsetX: 0.54, offsetY: -0.34, offsetZ: -0.28, scale: 1.4, light: {r:100,g:230,b:150}, dark: {r:130,g:255,b:180}, symbol: "play", packageName: "com.google.android.youtube", intent: "intent://#Intent;scheme=vnd.youtube;package=com.google.android.youtube;end", fallbackUrl: "https://www.youtube.com" },
-            { id: "SMS", parentId: "MsgRoot", offsetX: -0.52, offsetY: 0.28, offsetZ: -0.2, scale: 1.3, light: {r:0,g:130,b:230}, dark: {r:0,g:160,b:255}, symbol: "msg", packageName: "com.google.android.apps.messaging", intent: "intent://#Intent;scheme=sms;package=com.google.android.apps.messaging;end", fallbackUrl: "sms:" },
-            { id: "Torque", parentId: "DiagRoot", offsetX: -0.48, offsetY: -0.26, offsetZ: -0.18, scale: 1.3, light: {r:230,g:130,b:0}, dark: {r:255,g:160,b:0}, symbol: "play", packageName: "com.owl.torque", intent: "intent://#Intent;scheme=torque;package=com.owl.torque;end", fallbackUrl: "https://play.google.com/store/apps/details?id=com.owl.torque" }
+            { id: "GoogleMaps", parentId: "NavRoot", offsetX: -0.58, offsetY: 0.34, offsetZ: -0.28, scale: 1.7, light: {r:0,g:170,b:230}, dark: {r:0,g:200,b:255}, symbol: "nav", packageName: "com.google.android.apps.maps", intent: "intent://#Intent;scheme=geo;package=com.google.android.apps.maps;end", fallbackUrl: "https://www.google.com/maps" },
+            { id: "Waze", parentId: "NavRoot", offsetX: 0.64, offsetY: 0.22, offsetZ: 0.28, scale: 1.7, light: {r:30,g:200,b:240}, dark: {r:0,g:230,b:255}, symbol: "nav", packageName: "com.waze", intent: "intent://#Intent;scheme=waze;package=com.waze;end", fallbackUrl: "https://www.waze.com/livemap" },
+            { id: "Spotify", parentId: "MediaRoot", offsetX: -0.56, offsetY: -0.32, offsetZ: 0.24, scale: 1.7, light: {r:0,g:220,b:100}, dark: {r:0,g:255,b:120}, symbol: "music", packageName: "com.spotify.music", intent: "intent://#Intent;scheme=spotify;package=com.spotify.music;end", fallbackUrl: "https://open.spotify.com" },
+            { id: "YouTube", parentId: "MediaRoot", offsetX: 0.54, offsetY: -0.34, offsetZ: -0.28, scale: 1.7, light: {r:100,g:230,b:150}, dark: {r:130,g:255,b:180}, symbol: "play", packageName: "com.google.android.youtube", intent: "intent://#Intent;scheme=vnd.youtube;package=com.google.android.youtube;end", fallbackUrl: "https://www.youtube.com" },
+            { id: "SMS", parentId: "MsgRoot", offsetX: -0.52, offsetY: 0.28, offsetZ: -0.2, scale: 1.55, light: {r:0,g:130,b:230}, dark: {r:0,g:160,b:255}, symbol: "msg", packageName: "com.google.android.apps.messaging", intent: "intent://#Intent;scheme=sms;package=com.google.android.apps.messaging;end", fallbackUrl: "sms:" },
+            { id: "Torque", parentId: "DiagRoot", offsetX: -0.48, offsetY: -0.26, offsetZ: -0.18, scale: 1.55, light: {r:230,g:130,b:0}, dark: {r:255,g:160,b:0}, symbol: "play", packageName: "com.owl.torque", intent: "intent://#Intent;scheme=torque;package=com.owl.torque;end", fallbackUrl: "https://play.google.com/store/apps/details?id=com.owl.torque" }
         ];
 
         const stage3Nodes = [
-            { id: "NavLeafA", parentId: "NavRoot", offsetX: -0.18, offsetY: -0.9, offsetZ: 0.18, scale: 0.7, light: {r:0,g:170,b:220}, dark: {r:0,g:200,b:255} },
-            { id: "MediaLeafA", parentId: "MediaRoot", offsetX: 0.18, offsetY: -0.9, offsetZ: 0.14, scale: 0.7, light: {r:0,g:210,b:120}, dark: {r:0,g:240,b:150} },
-            { id: "MsgLeafA", parentId: "MsgRoot", offsetX: -0.24, offsetY: 0.82, offsetZ: -0.18, scale: 0.7, light: {r:0,g:150,b:240}, dark: {r:70,g:170,b:255} },
-            { id: "DiagLeafA", parentId: "DiagRoot", offsetX: 0.26, offsetY: 0.8, offsetZ: -0.12, scale: 0.7, light: {r:236,g:170,b:60}, dark: {r:255,g:150,b:30} }
+            { id: "NavLeafA", parentId: "NavRoot", offsetX: -0.18, offsetY: -0.9, offsetZ: 0.18, scale: 0.95, light: {r:0,g:170,b:220}, dark: {r:0,g:200,b:255} },
+            { id: "MediaLeafA", parentId: "MediaRoot", offsetX: 0.18, offsetY: -0.9, offsetZ: 0.14, scale: 0.95, light: {r:0,g:210,b:120}, dark: {r:0,g:240,b:150} },
+            { id: "MsgLeafA", parentId: "MsgRoot", offsetX: -0.24, offsetY: 0.82, offsetZ: -0.18, scale: 0.95, light: {r:0,g:150,b:240}, dark: {r:70,g:170,b:255} },
+            { id: "DiagLeafA", parentId: "DiagRoot", offsetX: 0.26, offsetY: 0.8, offsetZ: -0.12, scale: 0.95, light: {r:236,g:170,b:60}, dark: {r:255,g:150,b:30} }
         ];
 
         const glitchNode = { id: "GlitchRevert", baseAngle: 5.8, y: -1.9, scale: 1.5, light: {r:40,g:220,b:90}, dark: {r:50,g:255,b:50}, isGlitch: true, symbol: "warn", intent: "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end" };
@@ -169,29 +169,44 @@
         function drawCoreOrb() {
             const centerX = width * 0.5;
             const centerY = height * 0.5;
-            const drive = 0.15 + micLevel * 1.4;
-            const radius = 32 + drive * 24 + Math.sin(floatingPulse * 2.3) * 6;
-
-            const glow = ctx.createRadialGradient(centerX, centerY, radius * 0.12, centerX, centerY, radius * 2.5);
-            glow.addColorStop(0, `rgba(255,255,255,${0.95})`);
-            glow.addColorStop(0.25, `rgba(170,180,185,${0.8})`);
-            glow.addColorStop(0.55, `rgba(98,102,108,${0.42 + micLevel * 0.45})`);
-            glow.addColorStop(1, `rgba(38,42,46,0)`);
+            const baseRadius = 76 + micLevel * 34;
+            const wobble = Math.max(0, micLevel) * 18;
+            const points = 44;
 
             ctx.beginPath();
-            ctx.fillStyle = glow;
-            ctx.arc(centerX, centerY, radius * 2.5, 0, Math.PI * 2);
+            for (let i = 0; i <= points; i++) {
+                const angle = (i / points) * Math.PI * 2;
+                const wave = 1 + Math.sin(angle * 5.5 + floatingPulse * 3.6) * (0.12 + micLevel * 0.52);
+                const radius = baseRadius * wave + Math.sin(angle * 11.5 - floatingPulse * 2.8) * wobble * 0.6;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius * 0.9;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+
+            const greyFill = ctx.createRadialGradient(centerX - 18, centerY - 24, 12, centerX, centerY, baseRadius * 1.6);
+            greyFill.addColorStop(0, `rgba(248,248,248,${0.92})`);
+            greyFill.addColorStop(0.22, `rgba(200,204,208,${0.83})`);
+            greyFill.addColorStop(0.62, `rgba(126,130,136,${0.74})`);
+            greyFill.addColorStop(1, `rgba(58,62,68,${0.82})`);
+            ctx.fillStyle = greyFill;
             ctx.fill();
 
             ctx.beginPath();
-            ctx.fillStyle = `rgba(128, 134, 138, ${0.8 + micLevel * 0.2})`;
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.arc(centerX - baseRadius * 0.3, centerY - baseRadius * 0.25, baseRadius * 0.45, 0, Math.PI * 2);
             ctx.fill();
+        }
 
-            ctx.beginPath();
-            ctx.fillStyle = 'rgba(255,255,255,0.22)';
-            ctx.arc(centerX - radius * 0.28, centerY - radius * 0.28, radius * 0.46, 0, Math.PI * 2);
-            ctx.fill();
+        function getSurfaceAnchor(point, radiusScale = 1.35) {
+            const centerX = width * 0.5;
+            const centerY = height * 0.5;
+            const angle = Math.atan2(point.y - centerY, point.x - centerX);
+            const pull = 42 + micLevel * 22;
+            return {
+                x: point.x + Math.cos(angle) * point.size * radiusScale + Math.cos(angle * 3.0 + floatingPulse) * pull * 0.12,
+                y: point.y + Math.sin(angle) * point.size * radiusScale + Math.sin(angle * 3.0 + floatingPulse) * pull * 0.12
+            };
         }
 
         function drawPerspectiveGrid() {
@@ -268,7 +283,7 @@
             [...stage1Nodes, glitchNode].forEach(node => {
                 const finalAngle = node.baseAngle + rotationAngle;
                 const introFactor = 0.18 + introProgress * 0.82;
-                const radOffset = node.isGlitch ? cylinderRadius * 1.4 : cylinderRadius * 1.1;
+                const radOffset = node.isGlitch ? cylinderRadius * 1.4 : cylinderRadius * 1.3;
                 let rx = Math.sin(finalAngle) * radOffset * introFactor;
                 let rz = Math.cos(finalAngle) * radOffset * introFactor;
                 let ry = node.y + Math.sin(floatingPulse + node.baseAngle) * 0.2;
@@ -289,11 +304,11 @@
             stage2Nodes.forEach(node => {
                 const pNode = computedMap[node.parentId];
                 if (!pNode) return;
-                const rx = pNode.x + node.offsetX * (0.42 + introProgress * 0.58);
-                const ry = pNode.y + node.offsetY * (0.42 + introProgress * 0.58) + Math.sin(floatingPulse * 1.5 + node.offsetX) * 0.05;
-                const rz = pNode.z + node.offsetZ * (0.32 + introProgress * 0.68);
+                const rx = pNode.x + node.offsetX * (0.52 + introProgress * 0.68);
+                const ry = pNode.y + node.offsetY * (0.52 + introProgress * 0.68) + Math.sin(floatingPulse * 1.5 + node.offsetX) * 0.05;
+                const rz = pNode.z + node.offsetZ * (0.38 + introProgress * 0.82);
                 const p = project(rx, ry, rz);
-                p.size *= node.scale * (0.95 + introProgress * 0.12);
+                p.size *= node.scale * (1.12 + introProgress * 0.18);
                 computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p };
                 allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: { ...node, tier: 2 }, tier: 2 });
             });
@@ -301,20 +316,26 @@
             stage3Nodes.forEach(node => {
                 const pNode = computedMap[node.parentId];
                 if (!pNode) return;
-                const rx = pNode.x + node.offsetX * (0.48 + introProgress * 0.52);
-                const ry = pNode.y + node.offsetY * (0.48 + introProgress * 0.52) + Math.cos(floatingPulse + node.offsetX) * 0.04;
-                const rz = pNode.z + node.offsetZ * (0.5 + introProgress * 0.5);
+                const rx = pNode.x + node.offsetX * (0.58 + introProgress * 0.62);
+                const ry = pNode.y + node.offsetY * (0.58 + introProgress * 0.62) + Math.cos(floatingPulse + node.offsetX) * 0.04;
+                const rz = pNode.z + node.offsetZ * (0.56 + introProgress * 0.44);
                 const p = project(rx, ry, rz);
-                p.size *= node.scale;
+                p.size *= node.scale * 1.15;
                 computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p };
                 allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: { ...node, tier: 3 }, tier: 3 });
             });
 
             const connectionLinks = [];
             stage1Nodes.forEach(node => {
-                const from = centerHub;
                 const to = computedMap[node.id]?.screen;
                 if (!to) return;
+                const surfAngle = node.baseAngle + rotationAngle;
+                const innerRadius = 58 + micLevel * 28;
+                const from = {
+                    x: width * 0.5 + Math.cos(surfAngle) * innerRadius,
+                    y: height * 0.5 + Math.sin(surfAngle) * innerRadius * 0.9,
+                    size: 20
+                };
                 const alpha = Math.max(0.18, 1 - ((to.depth + 1.2) / 9));
                 connectionLinks.push({ from, to, alpha, tier: 1, color: isDarkMode ? node.dark : node.light });
             });
@@ -326,7 +347,8 @@
                 const parentNode = [...stage1Nodes, glitchNode].find(n => n.id === item.node.parentId) || null;
                 const parentColor = parentNode ? (isDarkMode ? parentNode.dark : parentNode.light) : {r:255,g:255,b:255};
                 const alpha = Math.max(0.15, 1 - ((item.depth + 1.4) / 10));
-                connectionLinks.push({ from: parentProj.screen, to: item, alpha, tier: item.tier, color: parentColor });
+                const from = getSurfaceAnchor(parentProj.screen, item.tier === 3 ? 1.8 : 1.45);
+                connectionLinks.push({ from, to: item, alpha, tier: item.tier, color: parentColor });
             });
 
             connectionLinks.forEach(link => {
@@ -433,13 +455,13 @@
         }
 
         function checkTapLocation(e) {
-            const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
-            if (!clientX || !clientY) return;
+            const clientX = e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX);
+            const clientY = e.clientY ?? (e.touches && e.touches[0] && e.touches[0].clientY);
+            if (clientX == null || clientY == null) return;
 
             const interactables = [...stage1Nodes, ...stage2Nodes, glitchNode];
             for (let node of interactables) {
-                if (!node.currentScreenX) continue;
+                if (node.currentScreenX == null || node.currentScreenY == null) continue;
                 const distance = Math.hypot(clientX - node.currentScreenX, clientY - node.currentScreenY);
                 if (distance <= node.currentRadius + 18) {
                     if (node.id === "GlitchRevert") {
