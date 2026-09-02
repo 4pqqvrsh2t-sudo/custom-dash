@@ -145,12 +145,12 @@
         function saveClusterSettings() { localStorage.setItem(clusterSettingsKey, JSON.stringify(clusterSettings)); }
         function loadLayoutPresets() { try { const saved = JSON.parse(localStorage.getItem(layoutPresetsKey) || '[]'); layoutPresets = Array.isArray(saved) ? saved : []; } catch (e) { layoutPresets = []; } }
         function saveLayoutPresets() { localStorage.setItem(layoutPresetsKey, JSON.stringify(layoutPresets)); }
-        function loadSavedTheme() { try { const saved = localStorage.getItem(paletteThemeKey); if (saved) activeThemeId = saved; } catch (e) { activeThemeId = 'aurora'; } }
+        function loadSavedTheme() { try { const saved = localStorage.getItem(paletteThemeKey); if (saved) activeThemeId = saved; const darkSaved = localStorage.getItem('darkModeEnabled'); if (darkSaved === '0') darkModeEnabled = false; } catch (e) { activeThemeId = 'aurora'; darkModeEnabled = true; } }
         function saveSavedTheme() { localStorage.setItem(paletteThemeKey, activeThemeId); }
         function syncSettingsControls() { document.getElementById('centerRadiusInput').value = clusterSettings.centerRadius; document.getElementById('rootScaleInput').value = clusterSettings.rootScale; document.getElementById('stage1To2Input').value = clusterSettings.stage1To2; document.getElementById('stage2To3Input').value = clusterSettings.stage2To3; document.getElementById('clusterAlphaInput').value = clusterSettings.clusterAlpha; document.getElementById('lineWeightInput').value = clusterSettings.lineWeight; document.getElementById('centerRadiusValue').textContent = clusterSettings.centerRadius.toFixed(1); document.getElementById('rootScaleValue').textContent = clusterSettings.rootScale.toFixed(1); document.getElementById('stage1To2Value').textContent = clusterSettings.stage1To2.toFixed(1); document.getElementById('stage2To3Value').textContent = clusterSettings.stage2To3.toFixed(2); document.getElementById('clusterAlphaValue').textContent = clusterSettings.clusterAlpha.toFixed(2); document.getElementById('lineWeightValue').textContent = clusterSettings.lineWeight.toFixed(1); }
         function applySettingsFromInputs() { clusterSettings.centerRadius = Number(document.getElementById('centerRadiusInput').value); clusterSettings.rootScale = Number(document.getElementById('rootScaleInput').value); clusterSettings.stage1To2 = Number(document.getElementById('stage1To2Input').value); clusterSettings.stage2To3 = Number(document.getElementById('stage2To3Input').value); clusterSettings.clusterAlpha = Number(document.getElementById('clusterAlphaInput').value); clusterSettings.lineWeight = Number(document.getElementById('lineWeightInput').value); cylinderRadius = clusterSettings.centerRadius; saveClusterSettings(); syncSettingsControls(); }
         function buildParentOptions() { const parentSelect = document.getElementById('newNodeParentSelect'); const current = parentSelect.value || 'NavRoot'; parentSelect.innerHTML = stage1Nodes.map(node => `<option value="${node.id}">${node.id.replace('Root','')}</option>`).join(''); parentSelect.value = current; }
-        function buildPaletteButtons() { const grid = document.getElementById('palette-theme-grid'); if (!grid) return; grid.innerHTML = paletteThemes.map(theme => { const swatches = theme.rootColors.map(color => `rgb(${color.join(',')})`).join(', '); return `<button type="button" class="theme-card ${theme.id === activeThemeId ? 'is-active' : ''}" data-theme-id="${theme.id}"><div class="theme-swatch" style="background:linear-gradient(90deg, ${swatches});"></div><div class="theme-name">${theme.name}</div></button>`; }).join(''); grid.querySelectorAll('.theme-card').forEach(card => { card.addEventListener('click', () => { activeThemeId = card.dataset.themeId; saveSavedTheme(); applyTheme(activeThemeId); renderPaletteButtons(); }); }); }
+        function buildPaletteButtons() { const grid = document.getElementById('palette-theme-grid'); if (!grid) return; grid.innerHTML = paletteThemes.map(theme => { const swatches = theme.rootColors.map(color => `rgb(${color.join(',')})`).join(', '); return `<button type="button" class="theme-card ${theme.id === activeThemeId ? 'is-active' : ''}" data-theme-id="${theme.id}"><div class="theme-swatch" style="background:linear-gradient(90deg, ${swatches});"></div><div class="theme-name">${theme.name}</div></button>`; }).join(''); grid.querySelectorAll('.theme-card').forEach(card => { card.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); activeThemeId = card.dataset.themeId; saveSavedTheme(); applyTheme(activeThemeId); buildPaletteButtons(); }); }); }
         function renderPaletteButtons() { buildPaletteButtons(); }
         function updateDarkModeButton() {
             const button = document.getElementById('toggle-dark-mode');
@@ -161,33 +161,41 @@
         function applyTheme(themeId) {
             if (!paletteThemes || !paletteThemes.length) return;
             const theme = paletteThemes.find(item => item.id === themeId) || paletteThemes[0];
-            if (!theme || !theme.rootColors) return;
+            if (!theme || !theme.rootColors || !theme.rootColors.length) return;
             activeThemeId = theme.id;
-            const backgroundTheme = darkModeEnabled
-                ? 'radial-gradient(circle at 50% 50%, rgba(255,166,78,0.12) 0%, rgba(80,110,255,0.08) 20%, rgba(16,18,22,0.96) 48%, rgba(9,11,15,1) 100%)'
-                : theme.background;
-            document.body.style.background = backgroundTheme;
-            canvas.style.background = backgroundTheme;
-            document.documentElement.style.background = backgroundTheme;
-            if (window.__themeGridColor !== (darkModeEnabled ? 'rgba(255,255,255,0.18)' : theme.grid)) {
-                window.__themeGridColor = darkModeEnabled ? 'rgba(255,255,255,0.18)' : theme.grid;
-            }
-            if (stage1Nodes && stage1Nodes.length) {
-                stage1Nodes.forEach((node, idx) => { const color = theme.rootColors[idx % theme.rootColors.length]; if (color) { node.light = { r: color[0], g: color[1], b: color[2] }; node.dark = { r: Math.min(255, color[0] + 30), g: Math.min(255, color[1] + 30), b: Math.min(255, color[2] + 30) }; } });
-            }
-            if (stage2Nodes && stage2Nodes.length) {
-                stage2Nodes.forEach(node => {
-                    const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
-                    const tone = theme.rootColors[(Math.abs(node.offsetX) * 10 + Math.abs(node.offsetY) * 8) % theme.rootColors.length];
-                    if (tone) { node.light = { r: Math.max(20, tone[0] - 10), g: Math.max(20, tone[1] - 10), b: Math.max(20, tone[2] - 10) }; node.dark = { r: Math.min(255, tone[0] + 30), g: Math.min(255, tone[1] + 30), b: Math.min(255, tone[2] + 30) }; }
-                });
-            }
-            if (stage3Nodes && stage3Nodes.length) {
-                stage3Nodes.forEach(node => {
-                    const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
-                    const tone = theme.rootColors[(Math.abs(node.offsetX) * 7 + Math.abs(node.offsetY) * 9 + 1) % theme.rootColors.length];
-                    if (tone) { node.light = { r: Math.max(20, tone[0] - 20), g: Math.max(20, tone[1] - 20), b: Math.max(20, tone[2] - 20) }; node.dark = { r: Math.min(255, tone[0] + 25), g: Math.min(255, tone[1] + 25), b: Math.min(255, tone[2] + 25) }; }
-                });
+            
+            try {
+                if (stage1Nodes) {
+                    stage1Nodes.forEach((node, idx) => {
+                        const color = theme.rootColors[idx % theme.rootColors.length];
+                        if (color && color.length >= 3) {
+                            node.light = { r: color[0], g: color[1], b: color[2] };
+                            node.dark = { r: Math.min(255, Math.floor(color[0] * 0.6)), g: Math.min(255, Math.floor(color[1] * 0.6)), b: Math.min(255, Math.floor(color[2] * 0.6)) };
+                        }
+                    });
+                }
+                if (stage2Nodes) {
+                    stage2Nodes.forEach(node => {
+                        const idx = (Math.abs(node.offsetX || 0) * 10 + Math.abs(node.offsetY || 0) * 8) % theme.rootColors.length;
+                        const tone = theme.rootColors[idx];
+                        if (tone && tone.length >= 3) {
+                            node.light = { r: Math.max(20, tone[0] - 10), g: Math.max(20, tone[1] - 10), b: Math.max(20, tone[2] - 10) };
+                            node.dark = { r: Math.max(10, Math.floor(tone[0] * 0.5)), g: Math.max(10, Math.floor(tone[1] * 0.5)), b: Math.max(10, Math.floor(tone[2] * 0.5)) };
+                        }
+                    });
+                }
+                if (stage3Nodes) {
+                    stage3Nodes.forEach(node => {
+                        const idx = (Math.abs(node.offsetX || 0) * 7 + Math.abs(node.offsetY || 0) * 9 + 1) % theme.rootColors.length;
+                        const tone = theme.rootColors[idx];
+                        if (tone && tone.length >= 3) {
+                            node.light = { r: Math.max(20, tone[0] - 20), g: Math.max(20, tone[1] - 20), b: Math.max(20, tone[2] - 20) };
+                            node.dark = { r: Math.max(8, Math.floor(tone[0] * 0.45)), g: Math.max(8, Math.floor(tone[1] * 0.45)), b: Math.max(8, Math.floor(tone[2] * 0.45)) };
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Error applying theme:', e);
             }
             saveSavedTheme();
         }
@@ -342,22 +350,26 @@
         }
         function renderLoop() {
             const activeTheme = paletteThemes.find(item => item.id === activeThemeId) || paletteThemes[0];
-            const backgroundTheme = darkModeEnabled
-                ? 'radial-gradient(circle at 50% 50%, rgba(255,166,78,0.12) 0%, rgba(80,110,255,0.08) 20%, rgba(16,18,22,0.96) 48%, rgba(9,11,15,1) 100%)'
-                : activeTheme.background;
             isDarkMode = darkModeEnabled || (currentBrightness < 0.4);
-            ctx.fillStyle = backgroundTheme;
+            
             if (darkModeEnabled) {
+                ctx.fillStyle = 'rgba(9, 11, 15, 1)';
+                ctx.fillRect(0, 0, width, height);
                 const pulse = 0.06 + ((Math.sin(floatingPulse * 0.9) + 1) * 0.04);
                 const glow = ctx.createRadialGradient(width / 2, height / 2, 20, width / 2, height / 2, minScreenDim * 0.75);
-                glow.addColorStop(0, `rgba(255, 170, 94, ${pulse})`);
-                glow.addColorStop(0.4, `rgba(90, 120, 255, ${pulse * 0.7})`);
+                glow.addColorStop(0, `rgba(255, 166, 94, ${pulse * 0.08})`);
+                glow.addColorStop(0.4, `rgba(90, 120, 255, ${pulse * 0.05})`);
                 glow.addColorStop(1, 'rgba(9, 11, 15, 0)');
                 ctx.fillStyle = glow;
                 ctx.fillRect(0, 0, width, height);
-                ctx.fillStyle = backgroundTheme;
+            } else {
+                const bgGrad = ctx.createRadialGradient(width * 0.2, height * 0.2, 100, width / 2, height / 2, Math.max(width, height));
+                const themeColors = activeTheme.rootColors || [[20,180,240]];
+                bgGrad.addColorStop(0, `rgba(${themeColors[0][0] + 30}, ${themeColors[0][1] + 30}, ${themeColors[0][2] + 30}, 0.15)`);
+                bgGrad.addColorStop(1, 'rgba(9, 13, 18, 1)');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, width, height);
             }
-            ctx.fillRect(0, 0, width, height);
             floatingPulse += 0.012;
             spinVelocity = (rotationAngle - lastRotationAngle) * 20; if(Math.abs(spinVelocity) > 3) spinVelocity = Math.sign(spinVelocity)*3; lastRotationAngle = rotationAngle;
             drawPerspectiveGrid(); const computedMap = {}; const allElementsToDraw = [];
@@ -508,7 +520,7 @@
         document.getElementById('toggle-dark-mode').addEventListener('click', () => {
             darkModeEnabled = !darkModeEnabled;
             updateDarkModeButton();
-            applyTheme(activeThemeId);
+            if (localStorage) localStorage.setItem('darkModeEnabled', darkModeEnabled ? '1' : '0');
         });
         document.getElementById('save-layout-preset').addEventListener('click', saveCurrentLayoutPreset);
         document.getElementById('apply-layout-preset').addEventListener('click', () => { const select = document.getElementById('layoutPresetSelect'); if (select.value) applyLayoutPreset(select.value); });
