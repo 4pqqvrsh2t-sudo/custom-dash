@@ -34,17 +34,17 @@
             { id: "FutureRoot", baseAngle: 5.2, y: -0.2, scale: 2.2, light: {r:130,g:150,b:180}, dark: {r:100,g:110,b:140}, symbol: "plus" }
         ];
                const stage2Nodes = [
-            { id: "GoogleMaps", parentId: "NavRoot", offsetX: -0.42, offsetY: 0.34, offsetZ: -0.36, scale: 1.7, light: {r:0,g:170,b:230}, dark: {r:0,g:200,b:255}, symbol: "nav", packageName: "com.google.android.apps.maps", intent: "intent://#Intent;scheme=geo;package=com.google.android.apps.maps;end", fallbackUrl: "https://www.google.com/maps" },
-            { id: "Waze", parentId: "NavRoot", offsetX: 0.48, offsetY: 0.25, offsetZ: 0.38, scale: 1.7, light: {r:30,g:200,b:240}, dark: {r:0,g:230,b:255}, symbol: "nav", packageName: "com.waze", intent: "intent://#Intent;scheme=waze;package=com.waze;end", fallbackUrl: "https://www.waze.com/livemap" },
-            { id: "Spotify", parentId: "MediaRoot", offsetX: -0.45, offsetY: -0.32, offsetZ: 0.36, scale: 1.7, light: {r:0,g:220,b:100}, dark: {r:0,g:255,b:120}, symbol: "music", packageName: "com.spotify.music", intent: "intent://#Intent;scheme=spotify;package=com.spotify.music;end", fallbackUrl: "https://open.spotify.com" },
-            { id: "YouTube", parentId: "MediaRoot", offsetX: 0.43, offsetY: -0.34, offsetZ: -0.38, scale: 1.7, light: {r:100,g:230,b:150}, dark: {r:130,g:255,b:180}, symbol: "play", packageName: "com.google.android.youtube", intent: "intent://#Intent;scheme=vnd.youtube;package=com.google.android.youtube;end", fallbackUrl: "https://www.youtube.com" },
-            { id: "RadioApp", parentId: "MediaRoot", offsetX: 0.12, offsetY: -0.7, offsetZ: 0.22, scale: 1.6, light: {r:0,g:210,b:180}, dark: {r:0,g:240,b:210}, symbol: "music", intent: "" },
-            { id: "SMS", parentId: "MsgRoot", offsetX: -0.42, offsetY: 0.38, offsetZ: -0.28, scale: 1.6, light: {r:0,g:130,b:230}, dark: {r:0,g:160,b:255}, symbol: "msg", packageName: "com.google.android.apps.messaging", intent: "intent://#Intent;scheme=sms;package=com.google.android.apps.messaging;end", fallbackUrl: "sms:" },
-            { id: "Torque", parentId: "DiagRoot", offsetX: -0.46, offsetY: -0.38, offsetZ: -0.26, scale: 1.6, light: {r:230,g:130,b:0}, dark: {r:255,g:160,b:0}, symbol: "play", packageName: "com.owl.torque", intent: "intent://#Intent;scheme=torque;package=com.owl.torque;end", fallbackUrl: "https://play.google.com/store/apps/details?id=com.owl.torque" }
+            { id: "GoogleMaps", parentId: "NavRoot", offsetX: -0.34, offsetY: 0.28, offsetZ: -0.26, scale: 2.2, light: {r:0,g:170,b:230}, dark: {r:0,g:200,b:255}, symbol: "nav", packageName: "com.google.android.apps.maps", intent: "intent://#Intent;scheme=geo;package=com.google.android.apps.maps;end", fallbackUrl: "https://www.google.com/maps" },
+            { id: "Waze", parentId: "NavRoot", offsetX: 0.42, offsetY: 0.2, offsetZ: 0.34, scale: 2.2, light: {r:30,g:200,b:240}, dark: {r:0,g:230,b:255}, symbol: "nav", packageName: "com.waze", intent: "intent://#Intent;scheme=waze;package=com.waze;end", fallbackUrl: "https://www.waze.com/livemap" },
+            { id: "Spotify", parentId: "MediaRoot", offsetX: -0.38, offsetY: -0.26, offsetZ: 0.28, scale: 2.2, light: {r:0,g:220,b:100}, dark: {r:0,g:255,b:120}, symbol: "music", packageName: "com.spotify.music", intent: "intent://#Intent;scheme=spotify;package=com.spotify.music;end", fallbackUrl: "https://open.spotify.com" },
+            { id: "YouTube", parentId: "MediaRoot", offsetX: 0.36, offsetY: -0.28, offsetZ: -0.3, scale: 2.2, light: {r:100,g:230,b:150}, dark: {r:130,g:255,b:180}, symbol: "play", packageName: "com.google.android.youtube", intent: "intent://#Intent;scheme=vnd.youtube;package=com.google.android.youtube;end", fallbackUrl: "https://www.youtube.com" },
+            { id: "RadioApp", parentId: "MediaRoot", offsetX: 0.1, offsetY: -0.56, offsetZ: 0.18, scale: 2.0, light: {r:0,g:210,b:180}, dark: {r:0,g:240,b:210}, symbol: "music", intent: "" },
+            { id: "SMS", parentId: "MsgRoot", offsetX: -0.36, offsetY: 0.3, offsetZ: -0.22, scale: 2.0, light: {r:0,g:130,b:230}, dark: {r:0,g:160,b:255}, symbol: "msg", packageName: "com.google.android.apps.messaging", intent: "intent://#Intent;scheme=sms;package=com.google.android.apps.messaging;end", fallbackUrl: "sms:" },
+            { id: "Torque", parentId: "DiagRoot", offsetX: -0.4, offsetY: -0.3, offsetZ: -0.2, scale: 2.0, light: {r:230,g:130,b:0}, dark: {r:255,g:160,b:0}, symbol: "play", packageName: "com.owl.torque", intent: "intent://#Intent;scheme=torque;package=com.owl.torque;end", fallbackUrl: "https://play.google.com/store/apps/details?id=com.owl.torque" }
         ];
 
         const glitchNode = { id: "GlitchRevert", baseAngle: 6.0, y: -2.3, scale: 2.2, light: {r:40,g:220,b:90}, dark: {r:50,g:255,b:50}, isGlitch: true, symbol: "warn", intent: "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end" };
-        const stage3Nodes = []; stage1Nodes.forEach(p => { for(let i=0; i<3; i++) { stage3Nodes.push({ parentId: p.id, offsetX: (Math.random() > 0.5 ? 0.9 : -0.9) + (Math.random()-0.5)*0.5, offsetY: (Math.random() > 0.5 ? 0.9 : -1.0) + (Math.random()-0.5)*0.6, offsetZ: (Math.random()-0.5)*1.2, scale: 0.78, light: {r:p.light.r+15, g:p.light.g, b:p.light.b}, dark: {r:p.dark.r, g:p.dark.g, b:p.dark.b} }); } });
+        const stage3Nodes = []; stage1Nodes.forEach(p => { for(let i=0; i<1; i++) { stage3Nodes.push({ parentId: p.id, offsetX: (Math.random() > 0.5 ? 0.75 : -0.75) + (Math.random()-0.5)*0.4, offsetY: (Math.random() > 0.5 ? 0.75 : -0.85) + (Math.random()-0.5)*0.45, offsetZ: (Math.random()-0.5)*1.0, scale: 0.9, light: {r:p.light.r+15, g:p.light.g, b:p.light.b}, dark: {r:p.dark.r, g:p.dark.g, b:p.dark.b} }); } });
         const decayParticles = []; for(let i=0; i<15; i++) { decayParticles.push({ orbitRadius: 0.7 + Math.random() * 0.7, angle: Math.random() * 6.28, speed: 0.015 + Math.random() * 0.02, size: 2.5 + Math.random() * 2.5 }); }
         let floatingPulse = 0; let cameraX = 0; let introProgress = 0;
         function softenColor(c, bias = 24) {
@@ -80,17 +80,17 @@
             ctx.save();
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.shadowColor = `rgba(${glow.r}, ${glow.g}, ${glow.b}, 0.14)`;
-            ctx.shadowBlur = p.size * 1.2;
-            ctx.fillStyle = `rgba(${base.r}, ${base.g}, ${base.b}, ${0.08 + alpha * 0.12})`;
+            ctx.shadowColor = `rgba(${glow.r}, ${glow.g}, ${glow.b}, 0.22)`;
+            ctx.shadowBlur = p.size * 1.6;
+            ctx.fillStyle = `rgba(${base.r}, ${base.g}, ${base.b}, ${0.18 + alpha * 0.24})`;
             ctx.fill();
             ctx.restore();
 
             const fillGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.08, p.x, p.y, p.size * 1.2);
-            fillGradient.addColorStop(0, `rgba(${glow.r}, ${glow.g}, ${glow.b}, ${0.28 + alpha * 0.22})`);
-            fillGradient.addColorStop(0.25, `rgba(${base.r}, ${base.g}, ${base.b}, ${0.12 + alpha * 0.15})`);
-            fillGradient.addColorStop(0.72, `rgba(255, 255, 255, ${0.05 + alpha * 0.06})`);
-            fillGradient.addColorStop(1, `rgba(18, 28, 36, ${0.08 + alpha * 0.08})`);
+            fillGradient.addColorStop(0, `rgba(${glow.r}, ${glow.g}, ${glow.b}, ${0.44 + alpha * 0.28})`);
+            fillGradient.addColorStop(0.25, `rgba(${base.r}, ${base.g}, ${base.b}, ${0.22 + alpha * 0.2})`);
+            fillGradient.addColorStop(0.72, `rgba(255, 255, 255, ${0.12 + alpha * 0.11})`);
+            fillGradient.addColorStop(1, `rgba(18, 28, 36, ${0.14 + alpha * 0.12})`);
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -103,17 +103,17 @@
             ctx.clip();
 
             const reflectionGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.1, rimX, rimY, p.size * 1.4);
-            reflectionGradient.addColorStop(0, `rgba(255,255,255,${0.62 * alpha})`);
-            reflectionGradient.addColorStop(0.18, `rgba(210,245,255,${0.22 * alpha})`);
-            reflectionGradient.addColorStop(0.45, `rgba(160,220,255,${0.12 * alpha})`);
+            reflectionGradient.addColorStop(0, `rgba(255,255,255,${0.86 * alpha})`);
+            reflectionGradient.addColorStop(0.18, `rgba(210,245,255,${0.34 * alpha})`);
+            reflectionGradient.addColorStop(0.45, `rgba(160,220,255,${0.18 * alpha})`);
             reflectionGradient.addColorStop(1, 'rgba(255,255,255,0)');
 
             ctx.fillStyle = reflectionGradient;
             ctx.fillRect(p.x - p.size * 1.2, p.y - p.size * 1.2, p.size * 2.4, p.size * 2.4);
 
             const sweep = ctx.createLinearGradient(p.x - p.size * 0.9, p.y - p.size * 0.8, p.x + p.size * 0.8, p.y + p.size * 0.7);
-            sweep.addColorStop(0, `rgba(255,255,255,${0.38 * alpha})`);
-            sweep.addColorStop(0.35, `rgba(255,255,255,${0.09 * alpha})`);
+            sweep.addColorStop(0, `rgba(255,255,255,${0.52 * alpha})`);
+            sweep.addColorStop(0.35, `rgba(255,255,255,${0.15 * alpha})`);
             sweep.addColorStop(1, `rgba(255,255,255,0)`);
             ctx.fillStyle = sweep;
             ctx.beginPath();
@@ -124,8 +124,8 @@
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.lineWidth = 1.3;
-            ctx.strokeStyle = `rgba(255,255,255,${0.20 + alpha * 0.18})`;
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = `rgba(255,255,255,${0.28 + alpha * 0.22})`;
             ctx.stroke();
         }
         function drawPerspectiveGrid() {
@@ -143,12 +143,12 @@
             ctx.restore();
         }
         function renderLoop() {
-            isDarkMode = (currentBrightness < 0.4); ctx.fillStyle = isDarkMode ? '#0d1117' : '#f2f5f8'; ctx.fillRect(0, 0, width, height); floatingPulse += 0.012; introProgress = Math.min(1, introProgress + 0.013);
+            isDarkMode = (currentBrightness < 0.4); ctx.fillStyle = isDarkMode ? '#0d1117' : '#f2f5f8'; ctx.fillRect(0, 0, width, height); floatingPulse += 0.012; introProgress = Math.min(1, introProgress + 0.018);
             spinVelocity = (rotationAngle - lastRotationAngle) * 20; if(Math.abs(spinVelocity) > 3) spinVelocity = Math.sign(spinVelocity)*3; lastRotationAngle = rotationAngle;
             drawPerspectiveGrid(); const computedMap = {}; const allElementsToDraw = [];
            [...stage1Nodes, glitchNode].forEach(node => {
                 const finalAngle = node.baseAngle + rotationAngle; let radOffset = node.isGlitch ? cylinderRadius*1.5 : cylinderRadius;
-                const introFactor = 0.12 + (Math.min(1, introProgress) * 0.88);
+                const introFactor = 0.18 + introProgress * 0.82;
                 let rx = Math.sin(finalAngle) * radOffset * introFactor; let rz = Math.cos(finalAngle) * radOffset * introFactor; let ry = node.y + Math.sin(floatingPulse + node.baseAngle) * 0.15;
                 if (introProgress < 1) {
                     const seedBias = 1 - introProgress;
@@ -156,14 +156,14 @@
                     rz *= (0.16 + (1 - seedBias) * 0.84);
                     ry *= (0.18 + (1 - seedBias) * 0.82);
                 }
-                const p = project(rx, ry, rz); p.size *= node.scale; computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p }; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 1 });
+                const p = project(rx, ry, rz); p.size *= node.scale * (0.9 + introProgress * 0.18); computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p }; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 1 });
             });
             stage2Nodes.forEach(node => {
-                const pNode = computedMap[node.parentId]; if (!pNode) return; const rx = pNode.x+node.offsetX; const ry = pNode.y+node.offsetY+Math.sin(floatingPulse*1.5+node.offsetX)*0.05; const rz = pNode.z+node.offsetZ;
-                const p = project(rx, ry, rz); p.size *= node.scale; computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p }; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 2 });
+                const pNode = computedMap[node.parentId]; if (!pNode) return; const rx = pNode.x + node.offsetX * (0.38 + introProgress * 0.62); const ry = pNode.y + node.offsetY * (0.38 + introProgress * 0.62) + Math.sin(floatingPulse*1.5+node.offsetX)*0.05; const rz = pNode.z + node.offsetZ * (0.28 + introProgress * 0.72);
+                const p = project(rx, ry, rz); p.size *= node.scale * (0.95 + introProgress * 0.12); computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p }; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 2 });
             });
             stage3Nodes.forEach(node => {
-                const pNode = computedMap[node.parentId]; if (!pNode) return; const rx = pNode.x+node.offsetX; const ry = pNode.y+node.offsetY+Math.cos(floatingPulse+node.offsetX)*0.04; const rz = pNode.z+node.offsetZ;
+                const pNode = computedMap[node.parentId]; if (!pNode) return; const rx = pNode.x + node.offsetX * (0.42 + introProgress * 0.58); const ry = pNode.y + node.offsetY * (0.42 + introProgress * 0.58) + Math.cos(floatingPulse + node.offsetX)*0.04; const rz = pNode.z + node.offsetZ * (0.45 + introProgress * 0.55);
                 const p = project(rx, ry, rz); p.size *= node.scale; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 3 });
             });
             const connectionLinks = [];
@@ -171,13 +171,16 @@
                 if (!item.node.parentId) return;
                 const parentProj = computedMap[item.node.parentId];
                 if (!parentProj) return;
+                const parentNode = [...stage1Nodes, glitchNode].find(n => n.id === item.node.parentId) || null;
+                const parentColor = parentNode ? (isDarkMode ? parentNode.dark : parentNode.light) : {r:255,g:255,b:255};
                 const avgDepth = (item.depth + parentProj.screen.depth) / 2;
-                const alpha = Math.max(0.04, 1 - (avgDepth + cylinderRadius) / (cylinderRadius * 1.9));
+                const alpha = Math.max(0.12, 1 - (avgDepth + cylinderRadius) / (cylinderRadius * 1.9));
                 connectionLinks.push({
                     from: parentProj.screen,
                     to: item,
                     alpha,
-                    tier: item.tier
+                    tier: item.tier,
+                    color: parentColor
                 });
             });
             connectionLinks.forEach(link => {
@@ -185,42 +188,38 @@
                 const y1 = link.from.y;
                 const x2 = link.to.x;
                 const y2 = link.to.y;
-                const midX = (x1 + x2) * 0.5 + (Math.sin((x1 + y1 + x2 + y2) * 0.024) * 18);
-                const midY = (y1 + y2) * 0.5 + (Math.cos((x1 - y1 + x2 - y2) * 0.02) * 14);
-                const glow = ctx.createLinearGradient(x1, y1, x2, y2);
-                glow.addColorStop(0, `rgba(255,255,255,${link.alpha * 0.26})`);
-                glow.addColorStop(0.45, `rgba(150,230,255,${link.alpha * 0.50})`);
-                glow.addColorStop(1, `rgba(255,255,255,${link.alpha * 0.24})`);
+                const midX = (x1 + x2) * 0.5 + (Math.sin((x1 + y1 + x2 + y2) * 0.024) * 14);
+                const midY = (y1 + y2) * 0.5 + (Math.cos((x1 - y1 + x2 - y2) * 0.02) * 10);
+                const color = `rgba(${link.color.r}, ${link.color.g}, ${link.color.b}, ${link.alpha * 0.9})`;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.quadraticCurveTo(midX, midY, x2, y2);
-                ctx.lineWidth = link.tier === 2 ? 11 : 7.5;
-                ctx.shadowBlur = link.tier === 2 ? 12 : 8;
-                ctx.shadowColor = `rgba(137,214,255,${link.alpha * 0.55})`;
-                ctx.strokeStyle = glow;
+                ctx.lineWidth = link.tier === 2 ? 16 : 11;
+                ctx.shadowBlur = link.tier === 2 ? 14 : 10;
+                ctx.shadowColor = `rgba(${link.color.r}, ${link.color.g}, ${link.color.b}, ${link.alpha * 0.4})`;
+                ctx.strokeStyle = color;
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.quadraticCurveTo(midX, midY, x2, y2);
-                ctx.lineWidth = link.tier === 2 ? 5.5 : 3.8;
+                ctx.lineWidth = link.tier === 2 ? 8 : 5.2;
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = `rgba(255,255,255,${link.alpha * 0.33})`;
+                ctx.strokeStyle = `rgba(255,255,255,${link.alpha * 0.42})`;
                 ctx.stroke();
             });
             
-            const seedOrbRadius = 2.7 + (1 - introProgress) * 2.4;
-            const seedOrb = project(0, 0, 0.3);
-            seedOrb.size = seedOrbRadius * (0.8 + (1 - introProgress) * 0.8);
+            const seedOrbRadius = 3.2 + (1 - introProgress) * 2.6;
             const seedColor = { r: 120, g: 210, b: 255 };
-            const seedAlpha = Math.max(0.04, 1 - introProgress * 0.85);
-            drawGlassOrb({ x: width * 0.5, y: height * 0.5, size: seedOrb.size, x3d: 0, z3d: 0.3 }, seedColor, seedAlpha, { baseAngle: 0, y: 0, z3d: 0.3 });
+            const seedAlpha = Math.max(0.22, 1 - introProgress * 0.8);
+            const introOrb = { x: width * 0.5, y: height * 0.5, size: seedOrbRadius, x3d: 0, z3d: 0.3 };
+            drawGlassOrb(introOrb, seedColor, seedAlpha, { baseAngle: 0, y: 0, z3d: 0.3 });
 
             const finalSortedDrawList = [...allElementsToDraw].sort((a, b) => b.depth - a.depth);
             finalSortedDrawList.forEach(p => {
-                if (p.size <= 0) return; const alpha = Math.max(0.16, 1-(p.depth+cylinderRadius)/(cylinderRadius*1.8));
+                if (p.size <= 0) return; const alpha = Math.max(0.18, 1-(p.depth+cylinderRadius)/(cylinderRadius*1.8));
                 const c = isDarkMode ? p.node.dark : p.node.light;
                 const softC = softenColor(c, 18);
                 drawGlassOrb(p, softC, alpha, p.node);
