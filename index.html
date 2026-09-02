@@ -31,10 +31,13 @@
         .settings-actions button, .settings-section button { border:none; border-radius:10px; padding:10px 14px; cursor:pointer; }
         .primary-btn { background:#69d8ff; color:#06131b; font-weight:700; }
         .secondary-btn { background:rgba(255,255,255,0.06); color:#edf5ff; }
+        #palette-overlay { position:fixed; inset:0; background:rgba(7,10,14,0.56); display:flex; align-items:center; justify-content:center; z-index:45; opacity:0; pointer-events:none; transition:opacity 0.2s ease; }
+        #palette-overlay.visible { opacity:1; pointer-events:auto; }
+        #palette-panel { width:min(420px, calc(100vw - 28px)); background:rgba(15,18,22,0.94); border:1px solid rgba(255,255,255,0.12); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,0.4); padding:18px; }
         .theme-grid { display:grid; grid-template-columns:repeat(2, minmax(120px, 1fr)); gap:8px; }
         .theme-card { border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:rgba(255,255,255,0.03); color:#edf5ff; padding:8px 10px; text-align:left; cursor:pointer; }
         .theme-card.is-active { border-color:#69d8ff; box-shadow:0 0 0 1px rgba(105,216,255,0.6); }
-        .theme-swatch { height:16px; border-radius:999px; margin-bottom:6px; }
+        .theme-swatch { height:18px; border-radius:999px; margin-bottom:6px; }
         .theme-name { font-size:12px; font-weight:600; }
         @media (max-width: 520px) { .settings-grid, .theme-grid { grid-template-columns:1fr; } }
     </style>
@@ -84,14 +87,25 @@
             </div>
 
             <div class="settings-section">
-                <h3>Palette Themes</h3>
-                <div id="palette-theme-grid" class="theme-grid"></div>
+                <h3>Movement</h3>
+                <div class="stack-row">
+                    <button id="toggle-drag-mode" class="secondary-btn" type="button">Enable Move Mode</button>
+                </div>
             </div>
 
             <div class="settings-actions">
                 <button id="reset-settings" class="secondary-btn" type="button">Reset</button>
                 <button id="apply-settings" class="primary-btn" type="button">Apply</button>
             </div>
+        </div>
+    </div>
+    <div id="palette-overlay" aria-hidden="true">
+        <div id="palette-panel" role="dialog" aria-modal="true" aria-label="Palette themes">
+            <div class="settings-header">
+                <h2>Palette Themes</h2>
+                <button id="close-palette" class="close-btn" type="button">Close</button>
+            </div>
+            <div id="palette-theme-grid" class="theme-grid"></div>
         </div>
     </div>
     <div id="slider-container"><input type="range" id="slider" min="0" max="6.28" step="0.01" value="0"></div>
@@ -107,16 +121,17 @@
         const slider = document.getElementById('slider'); slider.addEventListener('input', (e) => { rotationAngle = parseFloat(e.target.value); });
         let initialPinchDist = null, currentBrightness = 1.0, isDarkMode = false;
         let dragState = null;
+        let dragModeEnabled = false;
         const clusterSettingsKey = 'blank-cluster-settings';
         const layoutPresetsKey = 'blank-cluster-layout-presets';
         const paletteThemeKey = 'blank-cluster-theme';
         const defaultClusterSettings = { centerRadius: 4.5, rootScale: 2.2, stage1To2: 1.0, stage2To3: 1.8, clusterAlpha: 0.55, lineWeight: 1.0 };
         const paletteThemes = [
-            { id: 'aurora', name: 'Aurora', rootColors: [[20,180,240],[38,214,160],[122,116,255],[255,170,90]], accent: '#8fe7ff' },
-            { id: 'sunset', name: 'Sunset Bloom', rootColors: [[255,122,83],[255,165,78],[255,194,103],[157,98,255]], accent: '#ffd59e' },
-            { id: 'violet', name: 'Violet Night', rootColors: [[118,92,255],[168,102,255],[75,165,255],[61,205,218]], accent: '#d9c7ff' },
-            { id: 'forest', name: 'Forest Mist', rootColors: [[58,154,118],[34,197,136],[118,176,127],[144,214,180]], accent: '#d8ffe7' },
-            { id: 'mono', name: 'Ice Steel', rootColors: [[121,142,168],[160,175,195],[205,218,236],[79,90,110]], accent: '#edf7ff' }
+            { id: 'aurora', name: 'Aurora', rootColors: [[20,180,240],[38,214,160],[122,116,255],[255,170,90]], background: 'radial-gradient(circle at 20% 20%, #132b3f 0%, #0b1018 42%, #090d12 100%)', grid: 'rgba(122, 232, 255, 0.08)', accent: '#8fe7ff' },
+            { id: 'sunset', name: 'Sunset Bloom', rootColors: [[255,122,83],[255,165,78],[255,194,103],[157,98,255]], background: 'radial-gradient(circle at 20% 20%, #47243d 0%, #180d15 42%, #0c0a11 100%)', grid: 'rgba(255, 197, 120, 0.08)', accent: '#ffd59e' },
+            { id: 'violet', name: 'Violet Night', rootColors: [[118,92,255],[168,102,255],[75,165,255],[61,205,218]], background: 'radial-gradient(circle at 20% 20%, #1a1d42 0%, #0d1020 40%, #090b12 100%)', grid: 'rgba(186, 170, 255, 0.08)', accent: '#d9c7ff' },
+            { id: 'forest', name: 'Forest Mist', rootColors: [[58,154,118],[34,197,136],[118,176,127],[144,214,180]], background: 'radial-gradient(circle at 20% 20%, #142b22 0%, #0b1211 44%, #090d0c 100%)', grid: 'rgba(165, 234, 190, 0.08)', accent: '#d8ffe7' },
+            { id: 'mono', name: 'Ice Steel', rootColors: [[121,142,168],[160,175,195],[205,218,236],[79,90,110]], background: 'radial-gradient(circle at 20% 20%, #1a222d 0%, #0d1218 44%, #090b0f 100%)', grid: 'rgba(200, 223, 255, 0.08)', accent: '#edf7ff' }
         ];
         let clusterSettings = { ...defaultClusterSettings };
         let cylinderRadius = clusterSettings.centerRadius;
@@ -136,6 +151,12 @@
         function applyTheme(themeId) {
             const theme = paletteThemes.find(item => item.id === themeId) || paletteThemes[0];
             activeThemeId = theme.id;
+            document.body.style.background = theme.background;
+            canvas.style.background = theme.background;
+            document.documentElement.style.background = theme.background;
+            if (window.__themeGridColor !== theme.grid) {
+                window.__themeGridColor = theme.grid;
+            }
             stage1Nodes.forEach((node, idx) => { const color = theme.rootColors[idx % theme.rootColors.length]; node.light = { r: color[0], g: color[1], b: color[2] }; node.dark = { r: Math.min(255, color[0] + 30), g: Math.min(255, color[1] + 30), b: Math.min(255, color[2] + 30) }; });
             stage2Nodes.forEach(node => {
                 const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
@@ -276,7 +297,8 @@
             ctx.restore();
         }
         function drawPerspectiveGrid() {
-            ctx.save(); ctx.strokeStyle = isDarkMode ? "rgba(0, 240, 255, 0.045)" : "rgba(0, 140, 220, 0.055)"; ctx.lineWidth = 1.0; const gc = 24, gs = 2.0; const gridOffset = rotationAngle*1.5;
+            const theme = paletteThemes.find(item => item.id === activeThemeId) || paletteThemes[0];
+            ctx.save(); ctx.strokeStyle = theme.grid; ctx.lineWidth = 1.0; const gc = 24, gs = 2.0; const gridOffset = rotationAngle*1.5;
             for(let i = -gc/2; i <= gc/2; i++) {
                 let pStart = project(i*gs, 4.0, -10.0), pEnd = project(i*gs, 4.0, 10.0); ctx.beginPath(); ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
                 pStart = project(i*gs, -4.0, -10.0); pEnd = project(i*gs, -4.0, 10.0); ctx.beginPath(); ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
@@ -300,7 +322,8 @@
             });
         }
         function renderLoop() {
-            isDarkMode = (currentBrightness < 0.4); ctx.fillStyle = isDarkMode ? '#0d1117' : '#f2f5f8'; ctx.fillRect(0, 0, width, height); floatingPulse += 0.012;
+            const activeTheme = paletteThemes.find(item => item.id === activeThemeId) || paletteThemes[0];
+            isDarkMode = (currentBrightness < 0.4); ctx.fillStyle = activeTheme.background; ctx.fillRect(0, 0, width, height); floatingPulse += 0.012;
             spinVelocity = (rotationAngle - lastRotationAngle) * 20; if(Math.abs(spinVelocity) > 3) spinVelocity = Math.sign(spinVelocity)*3; lastRotationAngle = rotationAngle;
             drawPerspectiveGrid(); const computedMap = {}; const allElementsToDraw = [];
            [...stage1Nodes, glitchNode].forEach(node => {
@@ -390,18 +413,20 @@
             }
             return hit;
         }
-        function checkTapLocation(e) { const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX); const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY); if (!clientX || !clientY) return; const targetNode = getNodeAtPointer(clientX, clientY); if (!targetNode) return; if (targetNode.id === 'Settings') { openSettingsPanel('settings'); return; }
-            if (targetNode.id === 'Palettes') { openSettingsPanel('palette'); return; }
+        function checkTapLocation(e) { const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX); const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY); if (!clientX || !clientY) return; const targetNode = getNodeAtPointer(clientX, clientY); if (!targetNode) return; if (targetNode.id === 'Settings') { if (dragModeEnabled) { dragModeEnabled = false; closeSettingsPanel(); return; } openSettingsPanel('settings'); return; }
+            if (targetNode.id === 'Palettes') { openPalettePanel(); return; }
             if (targetNode.id === 'GlitchRevert' || targetNode.intent) { window.location.href = targetNode.intent; return; }
+            if (dragModeEnabled) return;
             alert('Root Cluster Node Tapped.');
         }
         window.addEventListener('pointerdown', (e) => {
+            if (!dragModeEnabled) return;
             const clientX = e.clientX; const clientY = e.clientY; const targetNode = getNodeAtPointer(clientX, clientY);
             if (!targetNode || targetNode.id === 'Settings' || targetNode.id === 'Palettes' || targetNode.id === 'GlitchRevert' || targetNode.parentId === undefined) return;
             dragState = { node: targetNode, startX: clientX, startY: clientY, offsetX: targetNode.targetOffsetX ?? targetNode.offsetX ?? 0, offsetY: targetNode.targetOffsetY ?? targetNode.offsetY ?? 0, offsetZ: targetNode.targetOffsetZ ?? targetNode.offsetZ ?? 0 };
         });
         window.addEventListener('pointermove', (e) => {
-            if (!dragState) return;
+            if (!dragModeEnabled || !dragState) return;
             const dx = e.clientX - dragState.startX;
             const dy = e.clientY - dragState.startY;
             const node = dragState.node;
@@ -416,26 +441,35 @@
         window.addEventListener('pointerleave', () => { dragState = null; });
         window.addEventListener('click', checkTapLocation); window.addEventListener('touchstart', checkTapLocation);
         const settingsOverlay = document.getElementById('settings-overlay'); const closeSettings = document.getElementById('close-settings'); const applySettings = document.getElementById('apply-settings'); const resetSettings = document.getElementById('reset-settings');
+        const paletteOverlay = document.getElementById('palette-overlay'); const closePalette = document.getElementById('close-palette');
         function openSettingsPanel(tab = 'settings') {
             settingsOverlay.classList.add('visible');
             settingsOverlay.setAttribute('aria-hidden', 'false');
             syncSettingsControls();
-            if (tab === 'palette') {
-                const grid = document.getElementById('palette-theme-grid');
-                if (grid) {
-                    grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    grid.animate({ transform: ['scale(0.98)', 'scale(1)'] }, { duration: 220, easing: 'ease-out' });
-                }
-            }
         }
         function closeSettingsPanel() {
             settingsOverlay.classList.remove('visible');
             settingsOverlay.setAttribute('aria-hidden', 'true');
         }
+        function openPalettePanel() {
+            paletteOverlay.classList.add('visible');
+            paletteOverlay.setAttribute('aria-hidden', 'false');
+            renderPaletteButtons();
+        }
+        function closePalettePanel() {
+            paletteOverlay.classList.remove('visible');
+            paletteOverlay.setAttribute('aria-hidden', 'true');
+        }
         closeSettings.addEventListener('click', closeSettingsPanel);
+        closePalette.addEventListener('click', closePalettePanel);
         settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) closeSettingsPanel(); });
+        paletteOverlay.addEventListener('click', (e) => { if (e.target === paletteOverlay) closePalettePanel(); });
         applySettings.addEventListener('click', () => { applySettingsFromInputs(); closeSettingsPanel(); });
         resetSettings.addEventListener('click', () => { clusterSettings = { ...defaultClusterSettings }; cylinderRadius = clusterSettings.centerRadius; saveClusterSettings(); syncSettingsControls(); });
+        document.getElementById('toggle-drag-mode').addEventListener('click', () => {
+            dragModeEnabled = true;
+            closeSettingsPanel();
+        });
         document.getElementById('save-layout-preset').addEventListener('click', saveCurrentLayoutPreset);
         document.getElementById('apply-layout-preset').addEventListener('click', () => { const select = document.getElementById('layoutPresetSelect'); if (select.value) applyLayoutPreset(select.value); });
         document.getElementById('delete-layout-preset').addEventListener('click', deleteSelectedLayoutPreset);
@@ -445,6 +479,7 @@
         buildParentOptions();
         syncLayoutPresetList();
         renderPaletteButtons();
+        applyTheme(activeThemeId);
         syncSettingsControls(); renderLoop();
     </script>
 </body>
