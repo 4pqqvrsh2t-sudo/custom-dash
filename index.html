@@ -125,32 +125,36 @@
         let initialPinchDist = null, currentBrightness = 1.0, isDarkMode = false;
         let dragState = null;
         let dragModeEnabled = false;
-        let darkModeEnabled = true;
+        let darkModeEnabled = false;
         const clusterSettingsKey = 'blank-cluster-settings';
         const layoutPresetsKey = 'blank-cluster-layout-presets';
         const paletteThemeKey = 'blank-cluster-theme';
         const defaultClusterSettings = { centerRadius: 4.5, rootScale: 2.2, stage1To2: 1.0, stage2To3: 1.8, clusterAlpha: 0.55, lineWeight: 1.0 };
         const paletteThemes = [
-            { id: 'aurora', name: 'Aurora', rootColors: [[20,180,240],[38,214,160],[122,116,255],[255,170,90]], background: 'radial-gradient(circle at 20% 20%, #132b3f 0%, #0b1018 42%, #090d12 100%)', grid: 'rgba(122, 232, 255, 0.08)', accent: '#8fe7ff' },
-            { id: 'sunset', name: 'Sunset Bloom', rootColors: [[255,122,83],[255,165,78],[255,194,103],[157,98,255]], background: 'radial-gradient(circle at 20% 20%, #47243d 0%, #180d15 42%, #0c0a11 100%)', grid: 'rgba(255, 197, 120, 0.08)', accent: '#ffd59e' },
-            { id: 'violet', name: 'Violet Night', rootColors: [[118,92,255],[168,102,255],[75,165,255],[61,205,218]], background: 'radial-gradient(circle at 20% 20%, #1a1d42 0%, #0d1020 40%, #090b12 100%)', grid: 'rgba(186, 170, 255, 0.08)', accent: '#d9c7ff' },
-            { id: 'forest', name: 'Forest Mist', rootColors: [[58,154,118],[34,197,136],[118,176,127],[144,214,180]], background: 'radial-gradient(circle at 20% 20%, #142b22 0%, #0b1211 44%, #090d0c 100%)', grid: 'rgba(165, 234, 190, 0.08)', accent: '#d8ffe7' },
-            { id: 'mono', name: 'Ice Steel', rootColors: [[121,142,168],[160,175,195],[205,218,236],[79,90,110]], background: 'radial-gradient(circle at 20% 20%, #1a222d 0%, #0d1218 44%, #090b0f 100%)', grid: 'rgba(200, 223, 255, 0.08)', accent: '#edf7ff' }
+            { id: 'standard', name: 'Standard', rootColors: [[0,180,240],[0,220,120],[100,150,255],[240,160,30],[100,200,200]], isDarkMode: false },
+            { id: 'aurora', name: 'Aurora', rootColors: [[20,180,240],[38,214,160],[122,116,255],[255,170,90],[66,200,188]], isDarkMode: true },
+            { id: 'sunset', name: 'Sunset Bloom', rootColors: [[255,122,83],[255,165,78],[255,194,103],[157,98,255],[255,140,100]], isDarkMode: true },
+            { id: 'violet', name: 'Violet Night', rootColors: [[118,92,255],[168,102,255],[75,165,255],[61,205,218],[120,180,255]], isDarkMode: true },
+            { id: 'forest', name: 'Forest Mist', rootColors: [[58,154,118],[34,197,136],[118,176,127],[144,214,180],[80,170,130]], isDarkMode: true },
+            { id: 'mono', name: 'Ice Steel', rootColors: [[121,142,168],[160,175,195],[205,218,236],[79,90,110],[140,160,185]], isDarkMode: true },
+            { id: 'ocean', name: 'Ocean Depth', rootColors: [[20,160,240],[60,200,255],[100,230,255],[30,120,200],[80,180,240]], isDarkMode: true },
+            { id: 'magma', name: 'Magma', rootColors: [[255,100,50],[255,150,80],[255,180,100],[255,60,20],[240,120,60]], isDarkMode: true },
+            { id: 'cyberpunk', name: 'Cyberpunk', rootColors: [[0,255,200],[255,0,200],[100,200,255],[255,150,0],[180,0,255]], isDarkMode: true }
         ];
         let clusterSettings = { ...defaultClusterSettings };
         let cylinderRadius = clusterSettings.centerRadius;
         let layoutPresets = [];
-        let activeThemeId = 'aurora';
+        let activeThemeId = 'standard';
         function loadClusterSettings() { try { const saved = JSON.parse(localStorage.getItem(clusterSettingsKey) || '{}'); clusterSettings = { ...defaultClusterSettings, ...saved }; } catch (e) { clusterSettings = { ...defaultClusterSettings }; } cylinderRadius = clusterSettings.centerRadius; }
         function saveClusterSettings() { localStorage.setItem(clusterSettingsKey, JSON.stringify(clusterSettings)); }
         function loadLayoutPresets() { try { const saved = JSON.parse(localStorage.getItem(layoutPresetsKey) || '[]'); layoutPresets = Array.isArray(saved) ? saved : []; } catch (e) { layoutPresets = []; } }
         function saveLayoutPresets() { localStorage.setItem(layoutPresetsKey, JSON.stringify(layoutPresets)); }
-        function loadSavedTheme() { try { const saved = localStorage.getItem(paletteThemeKey); if (saved) activeThemeId = saved; const darkSaved = localStorage.getItem('darkModeEnabled'); if (darkSaved === '0') darkModeEnabled = false; } catch (e) { activeThemeId = 'aurora'; darkModeEnabled = true; } }
+        function loadSavedTheme() { try { const saved = localStorage.getItem(paletteThemeKey); if (saved) activeThemeId = saved; const theme = paletteThemes.find(t => t.id === activeThemeId); darkModeEnabled = theme && theme.isDarkMode ? true : false; const darkSaved = localStorage.getItem('darkModeEnabled'); if (darkSaved !== null) darkModeEnabled = darkSaved === '1'; } catch (e) { activeThemeId = 'standard'; darkModeEnabled = false; } }
         function saveSavedTheme() { localStorage.setItem(paletteThemeKey, activeThemeId); }
         function syncSettingsControls() { document.getElementById('centerRadiusInput').value = clusterSettings.centerRadius; document.getElementById('rootScaleInput').value = clusterSettings.rootScale; document.getElementById('stage1To2Input').value = clusterSettings.stage1To2; document.getElementById('stage2To3Input').value = clusterSettings.stage2To3; document.getElementById('clusterAlphaInput').value = clusterSettings.clusterAlpha; document.getElementById('lineWeightInput').value = clusterSettings.lineWeight; document.getElementById('centerRadiusValue').textContent = clusterSettings.centerRadius.toFixed(1); document.getElementById('rootScaleValue').textContent = clusterSettings.rootScale.toFixed(1); document.getElementById('stage1To2Value').textContent = clusterSettings.stage1To2.toFixed(1); document.getElementById('stage2To3Value').textContent = clusterSettings.stage2To3.toFixed(2); document.getElementById('clusterAlphaValue').textContent = clusterSettings.clusterAlpha.toFixed(2); document.getElementById('lineWeightValue').textContent = clusterSettings.lineWeight.toFixed(1); }
         function applySettingsFromInputs() { clusterSettings.centerRadius = Number(document.getElementById('centerRadiusInput').value); clusterSettings.rootScale = Number(document.getElementById('rootScaleInput').value); clusterSettings.stage1To2 = Number(document.getElementById('stage1To2Input').value); clusterSettings.stage2To3 = Number(document.getElementById('stage2To3Input').value); clusterSettings.clusterAlpha = Number(document.getElementById('clusterAlphaInput').value); clusterSettings.lineWeight = Number(document.getElementById('lineWeightInput').value); cylinderRadius = clusterSettings.centerRadius; saveClusterSettings(); syncSettingsControls(); }
         function buildParentOptions() { const parentSelect = document.getElementById('newNodeParentSelect'); const current = parentSelect.value || 'NavRoot'; parentSelect.innerHTML = stage1Nodes.map(node => `<option value="${node.id}">${node.id.replace('Root','')}</option>`).join(''); parentSelect.value = current; }
-        function buildPaletteButtons() { const grid = document.getElementById('palette-theme-grid'); if (!grid) return; grid.innerHTML = paletteThemes.map(theme => { const swatches = theme.rootColors.map(color => `rgb(${color.join(',')})`).join(', '); return `<button type="button" class="theme-card ${theme.id === activeThemeId ? 'is-active' : ''}" data-theme-id="${theme.id}"><div class="theme-swatch" style="background:linear-gradient(90deg, ${swatches});"></div><div class="theme-name">${theme.name}</div></button>`; }).join(''); grid.querySelectorAll('.theme-card').forEach(card => { card.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); activeThemeId = card.dataset.themeId; saveSavedTheme(); applyTheme(activeThemeId); buildPaletteButtons(); }); }); }
+        function buildPaletteButtons() { const grid = document.getElementById('palette-theme-grid'); if (!grid) return; grid.innerHTML = paletteThemes.map(theme => { const swatches = theme.rootColors.map(color => `rgb(${color.join(',')})`).join(', '); return `<button type="button" class="theme-card ${theme.id === activeThemeId ? 'is-active' : ''}" data-theme-id="${theme.id}" data-is-dark="${theme.isDarkMode}"><div class="theme-swatch" style="background:linear-gradient(90deg, ${swatches});"></div><div class="theme-name">${theme.name}</div></button>`; }).join(''); grid.querySelectorAll('.theme-card').forEach(card => { card.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); activeThemeId = card.dataset.themeId; const theme = paletteThemes.find(t => t.id === activeThemeId); if (theme) { darkModeEnabled = theme.isDarkMode === true; localStorage.setItem('darkModeEnabled', darkModeEnabled ? '1' : '0'); updateDarkModeButton(); } saveSavedTheme(); applyTheme(activeThemeId); buildPaletteButtons(); }); }); }
         function renderPaletteButtons() { buildPaletteButtons(); }
         function updateDarkModeButton() {
             const button = document.getElementById('toggle-dark-mode');
@@ -370,7 +374,7 @@
                 ctx.fillStyle = bgGrad;
                 ctx.fillRect(0, 0, width, height);
             }
-            floatingPulse += 0.012;
+            floatingPulse += 0.018;
             spinVelocity = (rotationAngle - lastRotationAngle) * 20; if(Math.abs(spinVelocity) > 3) spinVelocity = Math.sign(spinVelocity)*3; lastRotationAngle = rotationAngle;
             drawPerspectiveGrid(); const computedMap = {}; const allElementsToDraw = [];
            [...stage1Nodes, glitchNode].forEach(node => {
@@ -520,7 +524,7 @@
         document.getElementById('toggle-dark-mode').addEventListener('click', () => {
             darkModeEnabled = !darkModeEnabled;
             updateDarkModeButton();
-            if (localStorage) localStorage.setItem('darkModeEnabled', darkModeEnabled ? '1' : '0');
+            localStorage.setItem('darkModeEnabled', darkModeEnabled ? '1' : '0');
         });
         document.getElementById('save-layout-preset').addEventListener('click', saveCurrentLayoutPreset);
         document.getElementById('apply-layout-preset').addEventListener('click', () => { const select = document.getElementById('layoutPresetSelect'); if (select.value) applyLayoutPreset(select.value); });
