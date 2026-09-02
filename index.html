@@ -159,7 +159,9 @@
             button.classList.toggle('is-on', darkModeEnabled);
         }
         function applyTheme(themeId) {
+            if (!paletteThemes || !paletteThemes.length) return;
             const theme = paletteThemes.find(item => item.id === themeId) || paletteThemes[0];
+            if (!theme || !theme.rootColors) return;
             activeThemeId = theme.id;
             const backgroundTheme = darkModeEnabled
                 ? 'radial-gradient(circle at 50% 50%, rgba(255,166,78,0.12) 0%, rgba(80,110,255,0.08) 20%, rgba(16,18,22,0.96) 48%, rgba(9,11,15,1) 100%)'
@@ -170,19 +172,23 @@
             if (window.__themeGridColor !== (darkModeEnabled ? 'rgba(255,255,255,0.18)' : theme.grid)) {
                 window.__themeGridColor = darkModeEnabled ? 'rgba(255,255,255,0.18)' : theme.grid;
             }
-            stage1Nodes.forEach((node, idx) => { const color = theme.rootColors[idx % theme.rootColors.length]; node.light = { r: color[0], g: color[1], b: color[2] }; node.dark = { r: Math.min(255, color[0] + 30), g: Math.min(255, color[1] + 30), b: Math.min(255, color[2] + 30) }; });
-            stage2Nodes.forEach(node => {
-                const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
-                const tone = theme.rootColors[(Math.abs(node.offsetX) * 10 + Math.abs(node.offsetY) * 8) % theme.rootColors.length];
-                node.light = { r: Math.max(20, tone[0] - 10), g: Math.max(20, tone[1] - 10), b: Math.max(20, tone[2] - 10) };
-                node.dark = { r: Math.min(255, tone[0] + 30), g: Math.min(255, tone[1] + 30), b: Math.min(255, tone[2] + 30) };
-            });
-            stage3Nodes.forEach(node => {
-                const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
-                const tone = theme.rootColors[(Math.abs(node.offsetX) * 7 + Math.abs(node.offsetY) * 9 + 1) % theme.rootColors.length];
-                node.light = { r: Math.max(20, tone[0] - 20), g: Math.max(20, tone[1] - 20), b: Math.max(20, tone[2] - 20) };
-                node.dark = { r: Math.min(255, tone[0] + 25), g: Math.min(255, tone[1] + 25), b: Math.min(255, tone[2] + 25) };
-            });
+            if (stage1Nodes && stage1Nodes.length) {
+                stage1Nodes.forEach((node, idx) => { const color = theme.rootColors[idx % theme.rootColors.length]; if (color) { node.light = { r: color[0], g: color[1], b: color[2] }; node.dark = { r: Math.min(255, color[0] + 30), g: Math.min(255, color[1] + 30), b: Math.min(255, color[2] + 30) }; } });
+            }
+            if (stage2Nodes && stage2Nodes.length) {
+                stage2Nodes.forEach(node => {
+                    const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
+                    const tone = theme.rootColors[(Math.abs(node.offsetX) * 10 + Math.abs(node.offsetY) * 8) % theme.rootColors.length];
+                    if (tone) { node.light = { r: Math.max(20, tone[0] - 10), g: Math.max(20, tone[1] - 10), b: Math.max(20, tone[2] - 10) }; node.dark = { r: Math.min(255, tone[0] + 30), g: Math.min(255, tone[1] + 30), b: Math.min(255, tone[2] + 30) }; }
+                });
+            }
+            if (stage3Nodes && stage3Nodes.length) {
+                stage3Nodes.forEach(node => {
+                    const source = stage1Nodes.find(root => root.id === node.parentId); if (!source) return;
+                    const tone = theme.rootColors[(Math.abs(node.offsetX) * 7 + Math.abs(node.offsetY) * 9 + 1) % theme.rootColors.length];
+                    if (tone) { node.light = { r: Math.max(20, tone[0] - 20), g: Math.max(20, tone[1] - 20), b: Math.max(20, tone[2] - 20) }; node.dark = { r: Math.min(255, tone[0] + 25), g: Math.min(255, tone[1] + 25), b: Math.min(255, tone[2] + 25) }; }
+                });
+            }
             saveSavedTheme();
         }
         function syncLayoutPresetList() { const select = document.getElementById('layoutPresetSelect'); if (!select) return; select.innerHTML = layoutPresets.length ? layoutPresets.map(p => `<option value="${p.name}">${p.name}</option>`).join('') : '<option value="">No presets saved</option>'; }
