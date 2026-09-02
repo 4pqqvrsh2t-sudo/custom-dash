@@ -44,9 +44,9 @@
         ];
 
         const glitchNode = { id: "GlitchRevert", baseAngle: 6.0, y: -2.3, scale: 2.2, light: {r:40,g:220,b:90}, dark: {r:50,g:255,b:50}, isGlitch: true, symbol: "warn", intent: "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end" };
-        const stage3Nodes = []; stage1Nodes.forEach(p => { for(let i=0; i<6; i++) { stage3Nodes.push({ parentId: p.id, offsetX: (Math.random() > 0.5 ? 1.2 : -1.2) + (Math.random()-0.5)*0.7, offsetY: (Math.random() > 0.5 ? 1.2 : -1.3) + (Math.random()-0.5)*0.8, offsetZ: (Math.random()-0.5)*1.6, scale: 0.9, light: {r:p.light.r+15, g:p.light.g, b:p.light.b}, dark: {r:p.dark.r, g:p.dark.g, b:p.dark.b} }); } });
+        const stage3Nodes = []; stage1Nodes.forEach(p => { for(let i=0; i<3; i++) { stage3Nodes.push({ parentId: p.id, offsetX: (Math.random() > 0.5 ? 0.9 : -0.9) + (Math.random()-0.5)*0.5, offsetY: (Math.random() > 0.5 ? 0.9 : -1.0) + (Math.random()-0.5)*0.6, offsetZ: (Math.random()-0.5)*1.2, scale: 0.78, light: {r:p.light.r+15, g:p.light.g, b:p.light.b}, dark: {r:p.dark.r, g:p.dark.g, b:p.dark.b} }); } });
         const decayParticles = []; for(let i=0; i<15; i++) { decayParticles.push({ orbitRadius: 0.7 + Math.random() * 0.7, angle: Math.random() * 6.28, speed: 0.015 + Math.random() * 0.02, size: 2.5 + Math.random() * 2.5 }); }
-        let floatingPulse = 0; let cameraX = 0;
+        let floatingPulse = 0; let cameraX = 0; let introProgress = 0;
         function softenColor(c, bias = 24) {
             return {
                 r: Math.min(255, c.r + bias),
@@ -71,26 +71,26 @@
         }
         function drawGlassOrb(p, color, alpha, node) {
             const base = softenColor(color, 18);
-            const glow = softenColor(color, 48);
-            const waveX = Math.sin(floatingPulse + (node.baseAngle || 0) + p.x3d * 0.6) * p.size * 0.22;
-            const waveY = Math.cos(floatingPulse * 1.4 + (node.y || 0) * 2.5 + p.z3d * 0.8) * p.size * 0.18;
-            const rimX = p.x - p.size * 0.42 + waveX;
-            const rimY = p.y - p.size * 0.48 + waveY;
+            const glow = softenColor(color, 42);
+            const waveX = Math.sin(floatingPulse + (node.baseAngle || 0) + p.x3d * 0.6) * p.size * 0.18;
+            const waveY = Math.cos(floatingPulse * 1.4 + (node.y || 0) * 2.5 + p.z3d * 0.8) * p.size * 0.14;
+            const rimX = p.x - p.size * 0.38 + waveX;
+            const rimY = p.y - p.size * 0.42 + waveY;
 
             ctx.save();
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.shadowColor = `rgba(${glow.r}, ${glow.g}, ${glow.b}, 0.22)`;
-            ctx.shadowBlur = p.size * 1.6;
-            ctx.fillStyle = `rgba(${base.r}, ${base.g}, ${base.b}, ${0.18 + alpha * 0.18})`;
+            ctx.shadowColor = `rgba(${glow.r}, ${glow.g}, ${glow.b}, 0.14)`;
+            ctx.shadowBlur = p.size * 1.2;
+            ctx.fillStyle = `rgba(${base.r}, ${base.g}, ${base.b}, ${0.08 + alpha * 0.12})`;
             ctx.fill();
             ctx.restore();
 
-            const fillGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.12, p.x, p.y, p.size * 1.18);
-            fillGradient.addColorStop(0, `rgba(${glow.r}, ${glow.g}, ${glow.b}, ${0.32 + alpha * 0.24})`);
-            fillGradient.addColorStop(0.28, `rgba(${base.r}, ${base.g}, ${base.b}, ${0.18 + alpha * 0.22})`);
-            fillGradient.addColorStop(0.7, `rgba(255, 255, 255, ${0.06 + alpha * 0.08})`);
-            fillGradient.addColorStop(1, `rgba(17, 36, 46, ${0.1 + alpha * 0.08})`);
+            const fillGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.08, p.x, p.y, p.size * 1.2);
+            fillGradient.addColorStop(0, `rgba(${glow.r}, ${glow.g}, ${glow.b}, ${0.28 + alpha * 0.22})`);
+            fillGradient.addColorStop(0.25, `rgba(${base.r}, ${base.g}, ${base.b}, ${0.12 + alpha * 0.15})`);
+            fillGradient.addColorStop(0.72, `rgba(255, 255, 255, ${0.05 + alpha * 0.06})`);
+            fillGradient.addColorStop(1, `rgba(18, 28, 36, ${0.08 + alpha * 0.08})`);
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -102,30 +102,30 @@
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.clip();
 
-            const reflectionGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.12, rimX, rimY, p.size * 1.5);
-            reflectionGradient.addColorStop(0, `rgba(255,255,255,${0.7 * alpha})`);
-            reflectionGradient.addColorStop(0.22, `rgba(210,245,255,${0.28 * alpha})`);
-            reflectionGradient.addColorStop(0.5, `rgba(160,220,255,${0.12 * alpha})`);
+            const reflectionGradient = ctx.createRadialGradient(rimX, rimY, p.size * 0.1, rimX, rimY, p.size * 1.4);
+            reflectionGradient.addColorStop(0, `rgba(255,255,255,${0.62 * alpha})`);
+            reflectionGradient.addColorStop(0.18, `rgba(210,245,255,${0.22 * alpha})`);
+            reflectionGradient.addColorStop(0.45, `rgba(160,220,255,${0.12 * alpha})`);
             reflectionGradient.addColorStop(1, 'rgba(255,255,255,0)');
 
             ctx.fillStyle = reflectionGradient;
-            ctx.fillRect(p.x - p.size * 1.25, p.y - p.size * 1.25, p.size * 2.5, p.size * 2.5);
+            ctx.fillRect(p.x - p.size * 1.2, p.y - p.size * 1.2, p.size * 2.4, p.size * 2.4);
 
             const sweep = ctx.createLinearGradient(p.x - p.size * 0.9, p.y - p.size * 0.8, p.x + p.size * 0.8, p.y + p.size * 0.7);
-            sweep.addColorStop(0, `rgba(255,255,255,${0.46 * alpha})`);
-            sweep.addColorStop(0.35, `rgba(255,255,255,${0.08 * alpha})`);
+            sweep.addColorStop(0, `rgba(255,255,255,${0.38 * alpha})`);
+            sweep.addColorStop(0.35, `rgba(255,255,255,${0.09 * alpha})`);
             sweep.addColorStop(1, `rgba(255,255,255,0)`);
             ctx.fillStyle = sweep;
             ctx.beginPath();
-            ctx.arc(p.x + waveX * 0.8, p.y + waveY * 0.7, p.size * 0.82, Math.PI * 0.9, Math.PI * 1.8);
-            ctx.quadraticCurveTo(p.x + p.size * 0.6, p.y - p.size * 0.5, p.x - p.size * 0.25, p.y - p.size * 0.25);
+            ctx.arc(p.x + waveX * 0.8, p.y + waveY * 0.7, p.size * 0.8, Math.PI * 0.9, Math.PI * 1.8);
+            ctx.quadraticCurveTo(p.x + p.size * 0.55, p.y - p.size * 0.45, p.x - p.size * 0.2, p.y - p.size * 0.2);
             ctx.fill();
             ctx.restore();
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.lineWidth = 1.1;
-            ctx.strokeStyle = `rgba(255,255,255,${0.18 + alpha * 0.2})`;
+            ctx.lineWidth = 1.3;
+            ctx.strokeStyle = `rgba(255,255,255,${0.20 + alpha * 0.18})`;
             ctx.stroke();
         }
         function drawPerspectiveGrid() {
@@ -143,15 +143,19 @@
             ctx.restore();
         }
         function renderLoop() {
-            isDarkMode = (currentBrightness < 0.4); ctx.fillStyle = isDarkMode ? '#0d1117' : '#f2f5f8'; ctx.fillRect(0, 0, width, height); floatingPulse += 0.012;
+            isDarkMode = (currentBrightness < 0.4); ctx.fillStyle = isDarkMode ? '#0d1117' : '#f2f5f8'; ctx.fillRect(0, 0, width, height); floatingPulse += 0.012; introProgress = Math.min(1, introProgress + 0.013);
             spinVelocity = (rotationAngle - lastRotationAngle) * 20; if(Math.abs(spinVelocity) > 3) spinVelocity = Math.sign(spinVelocity)*3; lastRotationAngle = rotationAngle;
             drawPerspectiveGrid(); const computedMap = {}; const allElementsToDraw = [];
            [...stage1Nodes, glitchNode].forEach(node => {
-
-
                 const finalAngle = node.baseAngle + rotationAngle; let radOffset = node.isGlitch ? cylinderRadius*1.5 : cylinderRadius;
-                let rx = Math.sin(finalAngle)*radOffset; let rz = Math.cos(finalAngle)*radOffset; let ry = node.y+Math.sin(floatingPulse+node.baseAngle)*0.15;
-        
+                const introFactor = 0.12 + (Math.min(1, introProgress) * 0.88);
+                let rx = Math.sin(finalAngle) * radOffset * introFactor; let rz = Math.cos(finalAngle) * radOffset * introFactor; let ry = node.y + Math.sin(floatingPulse + node.baseAngle) * 0.15;
+                if (introProgress < 1) {
+                    const seedBias = 1 - introProgress;
+                    rx *= (0.16 + (1 - seedBias) * 0.84);
+                    rz *= (0.16 + (1 - seedBias) * 0.84);
+                    ry *= (0.18 + (1 - seedBias) * 0.82);
+                }
                 const p = project(rx, ry, rz); p.size *= node.scale; computedMap[node.id] = { x: rx, y: ry, z: rz, screen: p }; allElementsToDraw.push({ ...p, x3d: rx, z3d: rz, node: node, tier: 1 });
             });
             stage2Nodes.forEach(node => {
@@ -207,6 +211,13 @@
                 ctx.stroke();
             });
             
+            const seedOrbRadius = 2.7 + (1 - introProgress) * 2.4;
+            const seedOrb = project(0, 0, 0.3);
+            seedOrb.size = seedOrbRadius * (0.8 + (1 - introProgress) * 0.8);
+            const seedColor = { r: 120, g: 210, b: 255 };
+            const seedAlpha = Math.max(0.04, 1 - introProgress * 0.85);
+            drawGlassOrb({ x: width * 0.5, y: height * 0.5, size: seedOrb.size, x3d: 0, z3d: 0.3 }, seedColor, seedAlpha, { baseAngle: 0, y: 0, z3d: 0.3 });
+
             const finalSortedDrawList = [...allElementsToDraw].sort((a, b) => b.depth - a.depth);
             finalSortedDrawList.forEach(p => {
                 if (p.size <= 0) return; const alpha = Math.max(0.16, 1-(p.depth+cylinderRadius)/(cylinderRadius*1.8));
