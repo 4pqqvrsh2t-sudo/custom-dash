@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="A spaced-repetition Python refresher that gets harder as you remember more." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>PyRecall</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">Py</div>
+        <div>
+          <h1>PyRecall</h1>
+          <p>Remember Python by using it.</p>
+        </div>
+      </div>
+      <div class="stats" aria-label="Your stats">
+        <div class="stat"><span>🔥</span><strong id="streakCount">0</strong><small>streak</small></div>
+        <div class="stat"><span>⚡</span><strong id="xpCount">0</strong><small>XP</small></div>
+      </div>
+    </header>
+
+    <main>
+      <section id="homeView" class="view active">
+        <div class="hero-card">
+          <div class="hero-copy">
+            <span class="eyebrow" id="todayLabel">TODAY</span>
+            <h2 id="heroTitle">Your Python memory workout</h2>
+            <p id="heroText">Five short questions chosen from concepts you already know.</p>
+            <div class="hero-actions">
+              <button class="primary" id="startDailyBtn">Start daily refresh</button>
+              <button class="secondary" id="eagerBtn">Challenge me</button>
+            </div>
+          </div>
+          <div class="progress-orb" id="progressOrb" style="--progress: 0deg">
+            <div><strong id="masteryPercent">0%</strong><span>mastery</span></div>
+          </div>
+        </div>
+
+        <div id="eagerBanner" class="banner hidden">
+          <div>
+            <strong>Eager to remember?</strong>
+            <p>You already finished today. I can stop asking what code means and make you manipulate it instead.</p>
+          </div>
+          <button class="secondary small" id="eagerBannerBtn">Give me a challenge</button>
+        </div>
+
+        <div class="grid two">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">MEMORY QUEUE</span>
+                <h3>What needs practice</h3>
+              </div>
+              <span class="pill" id="dueCount">0 due</span>
+            </div>
+            <div id="dueList" class="due-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">REMINDERS</span>
+                <h3>Daily nudge</h3>
+              </div>
+            </div>
+            <p class="muted">Set a preferred time. When the app can notify you, it will remind you to do your refresh.</p>
+            <div class="reminder-row">
+              <input id="reminderTime" type="time" value="18:00" />
+              <button class="secondary" id="enableReminderBtn">Enable reminders</button>
+            </div>
+            <p id="reminderStatus" class="tiny muted"></p>
+          </section>
+        </div>
+
+        <section class="panel concepts-panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">YOUR TOOLBOX</span>
+              <h3>Concepts you've learned</h3>
+            </div>
+            <button class="ghost" id="editConceptsBtn">Edit</button>
+          </div>
+          <p class="muted">Only these concepts can appear in your daily refresh. If a question surprises you, tap “I haven't learned this.”</p>
+          <div id="conceptSummary" class="chip-wrap"></div>
+        </section>
+      </section>
+
+      <section id="lessonView" class="view lesson-view">
+        <div class="lesson-top">
+          <button class="icon-btn" id="closeLessonBtn" aria-label="Exit lesson">✕</button>
+          <div class="lesson-progress"><span id="lessonProgressBar"></span></div>
+          <div class="hearts" id="lessonModeLabel">Daily</div>
+        </div>
+
+        <article class="question-card">
+          <div class="question-meta">
+            <span class="pill" id="questionConcept">Variables</span>
+            <span class="difficulty" id="questionDifficulty">Recall</span>
+          </div>
+          <h2 id="questionPrompt">Question</h2>
+          <pre id="codeBlock" class="code-block hidden"><code id="questionCode"></code></pre>
+          <div id="answerArea" class="answer-area"></div>
+          <button class="ghost warning" id="notLearnedBtn">I haven't learned this yet</button>
+        </article>
+
+        <section id="feedbackCard" class="feedback hidden" aria-live="polite">
+          <div>
+            <strong id="feedbackTitle"></strong>
+            <p id="feedbackText"></p>
+          </div>
+          <button class="primary" id="continueBtn">Continue</button>
+        </section>
+
+        <div class="lesson-footer" id="lessonFooter">
+          <button class="primary full" id="checkBtn">Check</button>
+        </div>
+      </section>
+
+      <section id="conceptView" class="view">
+        <div class="subpage-head">
+          <button class="icon-btn" id="backFromConceptsBtn">←</button>
+          <div>
+            <span class="eyebrow">SET YOUR LEVEL</span>
+            <h2>What have you learned?</h2>
+          </div>
+        </div>
+        <p class="muted">Turn on only concepts you have actually seen in your course. You can add more whenever you learn them.</p>
+        <div id="conceptEditor" class="concept-editor"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button class="nav-btn active" id="homeNavBtn"><span>⌂</span>Home</button>
+      <button class="nav-btn" id="practiceNavBtn"><span>⚡</span>Practice</button>
+      <button class="nav-btn" id="conceptsNavBtn"><span>◫</span>Concepts</button>
+    </nav>
+  </div>
+
+  <template id="optionTemplate">
+    <button class="option-btn" type="button"></button>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
