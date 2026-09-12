@@ -8,3 +8,15 @@
 .speed{inset:35% 0 auto}
 @media(max-width:650px) and (orientation:portrait){.speed{inset:35% 0 auto}}
 @media(orientation:landscape) and (max-height:550px){.speed{inset:35% 0 auto}}
+
+/* Keep cockpit chrome on screen while longer panels scroll internally. */
+html,body{height:100%;overflow:hidden}
+.shell{height:100svh;min-height:0}
+header,.location,nav,footer{flex-shrink:0}
+main{min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.cockpit-grid{min-height:100%;padding:3px 1px}
+@media(max-width:650px) and (orientation:portrait){
+ .instrument{max-width:245px}.speed strong{font-size:60px}
+ .scanner svg{max-height:46px}.cockpit-grid{gap:8px}
+ nav{position:relative;bottom:auto}
+}
