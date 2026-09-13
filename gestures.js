@@ -20,6 +20,7 @@
   function install(){
     let gesture=null;
     document.addEventListener('pointerdown',event=>{
+      if(document.body.classList.contains('booting'))return;
       if(!event.isPrimary||event.button>0||event.target.closest('input,select,textarea,audio,[contenteditable]'))return;
       if(event.clientX>32&&event.clientX<innerWidth-32)return;
       gesture={id:event.pointerId,x:event.clientX,y:event.clientY,time:performance.now()};

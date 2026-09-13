@@ -1,11 +1,11 @@
 'use strict';
 (() => {
   const q=s=>document.querySelector(s), ns='http://www.w3.org/2000/svg';
-  let mode='map', preview=false, vehicles=false, zoom=1, phase=0;
+  let mode='proximity', preview=false, vehicles=false, zoom=1, phase=0;
   const title=q('.cockpit-scanner .flight-top');
   title.innerHTML='<span>LOCAL SCANNER</span><span class="cyan" id="scanner-source">SCHEMATIC / DEMO</span>';
   const controls=document.createElement('div'); controls.className='scanner-mode-controls';
-  controls.innerHTML='<label>SCAN MODE<select id="scan-mode"><option value="map">MAP</option><option value="vehicle">VEHICLE</option><option value="road">ROAD</option><option value="proximity">PROXIMITY</option></select></label><label id="road-overlay" hidden><input id="scan-vehicles" type="checkbox"> VEHICLES</label>';
+  controls.innerHTML='<label>SCAN MODE<select id="scan-mode"><option value="map">MAP</option><option value="vehicle">VEHICLE</option><option value="road">ROAD</option><option value="proximity" selected>PROXIMITY</option></select></label><label id="road-overlay" hidden><input id="scan-vehicles" type="checkbox"> VEHICLES</label>';
   title.after(controls);
   const section=document.createElement('section');section.id='proximity';section.className='view';section.setAttribute('aria-label','Proximity');
   section.innerHTML='<div class="section-heading"><div><small>PERCEPTION / SENSOR FUSION</small><h1>PROXIMITY</h1></div><span class="cyan" id="perception-state">NO SENSOR DATA</span></div><div class="proximity-layout"><article class="panel"><div class="panel-title">LOCAL CONTACT FIELD <span>20 M RANGE</span></div><svg id="proximity-scope" viewBox="0 0 360 220" role="img" aria-label="Proximity sensor view, no data"></svg><p id="proximity-message" role="status">No sensor source connected. An empty display does not mean the area is clear.</p><label class="setting">Preview simulated contacts<input id="perception-preview" type="checkbox"></label></article><article class="panel"><div class="panel-title">CONTACT CLASSIFICATION</div><div id="contact-list"></div><div class="panel-title">SENSOR SOURCES</div><p>ULTRASONIC / NOT CONNECTED<br>CAMERA / NOT CONNECTED<br>OBJECT DETECTOR / NOT CONNECTED</p><p>Ultrasonic returns are unclassified obstacles. Cars, people and animals require a camera detector; accurate positions also require calibrated depth or range measurements.</p><p class="tiny">Prototype only—not collision avoidance. No footage is uploaded. Camera capture, detector inference and live sensor fusion are not installed in this build.</p></article></div>';
