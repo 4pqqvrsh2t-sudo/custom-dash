@@ -13,7 +13,7 @@ import android.widget.*;
 // Preview shell, not a replacement HOME launcher. No JavaScript/native bridge.
 public class MainActivity extends Activity {
     private WebView web;
-    private static final String HOME = "https://4pqqvrsh2t-sudo.github.io/custom-dash/index.html?v=10#cockpit";
+    private static final String HOME = "https://4pqqvrsh2t-sudo.github.io/custom-dash/index.html?v=11#cockpit";
     private static final String CHANNEL = "cockpit_return";
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
