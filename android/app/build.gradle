@@ -1,0 +1,6 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'dev.surfacecommand.dash'
+    compileSdk 35
+    defaultConfig { applicationId 'dev.surfacecommand.dash'; minSdk 26; targetSdk 35; versionCode 1; versionName '0.1-preview' }
+}

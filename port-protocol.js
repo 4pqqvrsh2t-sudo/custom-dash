@@ -9,6 +9,12 @@ const SurfaceProtocol = (() => {
       if (p.protocol !== 'surface-port/1' || !short(p.device,40) || !short(p.firmware,40)) throw Error('Expected surface-port/1, device and firmware.');
       return {type:'hello',device:p.device,firmware:p.firmware};
     }
+    if(p.type==='pins'){
+      const valid=[...Array(20).keys(),21,22,23,25,26,27,32,33,34,35,36,37,38,39],seen=new Set();
+      if(p.board!=='esp32-classic'||!Array.isArray(p.pins)||p.pins.length>34)throw Error('Expected esp32-classic pin report.');
+      const pins=p.pins.map(v=>{if(!v||!valid.includes(v.gpio)||seen.has(v.gpio)||typeof v.connected!=='boolean'||!short(v.label,40))throw Error('Invalid pin report.');seen.add(v.gpio);return {gpio:v.gpio,connected:v.connected,label:v.label};});
+      return {type:'pins',pins};
+    }
     if (p.type === 'sensors') {
       if (!Array.isArray(p.values) || p.values.length > 24) throw Error('Expected up to 24 sensor values.');
       const seen = new Set();

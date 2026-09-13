@@ -1,5 +1,19 @@
 # Surface Port — external sensors
 
+## Pin diagram
+
+The Port landing page now shows a classic ESP32 logical GPIO diagram, not the physical header order of a particular development board. Verify the exact board pinout before wiring. Some pins are reserved for flash/PSRAM or are input-only; this display is not a wiring recommendation. [Espressif GPIO reference](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/gpio.html).
+
+Firmware can send a complete pin-report array every second:
+
+```json
+{"type":"pins","board":"esp32-classic","pins":[{"gpio":21,"connected":true,"label":"I2C SDA"},{"gpio":22,"connected":true,"label":"I2C SCL"}]}
+```
+
+These are format examples only. Send `connected:true` based on your real wiring configuration or sensor detection, not merely a high GPIO logic level. Omitted pins are unknown. Reports older than five seconds lose their glow and become stale. Disconnect also stops the glow. Empty arrays clear reports. Other ESP32 variants require their own board map and are rejected here rather than mapped to incorrect pins.
+
+Preview connected-pin animation shows explicitly labeled examples, isolated from the actual serial connection. Turn it off to return to live pin reports. The starter sketch does not report attached pins until you add your actual sensor configuration.
+
 The Port tab is a read-only Web Serial client, not a firmware flasher or a universal socket detector. It reads one device you explicitly select. It does not write serial commands, scan networks, or upload sensor data. Opening a serial port can reset some development boards.
 
 ## First connection

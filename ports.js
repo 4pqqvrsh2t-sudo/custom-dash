@@ -2,7 +2,7 @@
 (() => {
   const supported = 'serial' in navigator && window.isSecureContext;
   let port=null, reader=null, task=null, busy=false, stopping=false, identified=false;
-  let packets=0, errors=0, last=0, lastSensors=0, lastPower=0, sensors=[], usbPower=null;
+  let packets=0, errors=0, last=0, lastSensors=0, lastPower=0, sensors=[], pinReport=[], pinTime=0, usbPower=null;
   const text=(id,value)=>$('#'+id).textContent=value;
   function controls() {
     $('#connect-port').disabled=!supported||busy||!!port;
@@ -16,7 +16,7 @@
     text('port-packets',packets); text('port-errors',errors);
     text('port-age',last?Math.floor((now-last)/1000)+'s AGO':'—');
     text('esp-power',lastPower ? (!port||now-lastPower>5000?'STALE / ':'')+(usbPower?'PRESENT / REPORTED':'ABSENT / REPORTED') : 'NOT REPORTED');
-    text('sensor-count',sensors.length);
+    text('sensor-count',sensors.length);if(typeof PinDiagram!=='undefined')PinDiagram.update(pinReport,pinTime,!!port);
     const container=$('#sensor-readings'); container.replaceChildren();
     if (!sensors.length) { const p=document.createElement('p');p.textContent='No sensor values received. Waiting for your firmware.';container.append(p); }
     sensors.forEach(v=>{
@@ -33,6 +33,7 @@
       const p=SurfaceProtocol.parse(line);packets++;last=Date.now();
       if (p.type==='hello') {identified=true;text('port-device',p.device);text('port-firmware',p.firmware);}
       if (p.type==='sensors') {sensors=p.values;lastSensors=last;}
+      if(p.type==='pins'){pinReport=p.pins;pinTime=last;}
       if (p.type==='power') {usbPower=p.usb_present;lastPower=last;}
     } catch {errors++;}
   }
@@ -64,7 +65,7 @@
       selected=await navigator.serial.requestPort();
       await selected.open({baudRate:Number($('#port-baud').value),bufferSize:8192});
       if(!selected.readable)throw Error('No readable stream');
-      port=selected;stopping=false;identified=false;packets=errors=last=lastSensors=lastPower=0;sensors=[];usbPower=null;
+      port=selected;stopping=false;identified=false;packets=errors=last=lastSensors=lastPower=0;sensors=[];pinReport=[];pinTime=0;usbPower=null;
       const info=port.getInfo(),hex=n=>n===undefined?'—':n.toString(16).padStart(4,'0').toUpperCase();
       text('port-usb',hex(info.usbVendorId)+' / '+hex(info.usbProductId));
       text('port-device','UNIDENTIFIED');text('port-firmware','—');
