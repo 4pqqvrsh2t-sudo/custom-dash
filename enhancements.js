@@ -38,19 +38,19 @@
     if (!prefs.sounds || document.hidden) return;
     try {
       const c = audioContext(); c.resume().catch(() => {});
-      const notes = type === 'engage' ? [220,330,660] : type === 'lock' ? [880,660] : type === 'zoom' ? [330,440] : [620];
+      const notes = type === 'engage' ? [82,123,164] : type === 'lock' ? [196,98] : type === 'zoom' ? [110,146] : type === 'port' ? [73,110,147] : [130,65];
       notes.forEach((frequency,i) => {
-        const start = c.currentTime + i * .075, o = c.createOscillator(), g = c.createGain();
-        o.type = 'triangle'; o.frequency.setValueAtTime(frequency,start); o.frequency.exponentialRampToValueAtTime(frequency * 1.2,start + .09);
-        g.gain.setValueAtTime(0,start); g.gain.linearRampToValueAtTime(.07 * prefs.volume / 100,start + .008); g.gain.exponentialRampToValueAtTime(.0001,start + .12);
-        o.connect(g).connect(c.destination); o.start(start); o.stop(start + .13); o.onended = () => { o.disconnect(); g.disconnect(); };
+        const start = c.currentTime + i * .065, o = c.createOscillator(), g = c.createGain();
+        o.type = i % 2 ? 'sine' : 'triangle'; o.frequency.setValueAtTime(frequency,start); o.frequency.exponentialRampToValueAtTime(frequency * .55,start + .18);
+        g.gain.setValueAtTime(0,start); g.gain.linearRampToValueAtTime(.07 * prefs.volume / 100,start + .008); g.gain.exponentialRampToValueAtTime(.0001,start + .22);
+        o.connect(g).connect(c.destination); o.start(start); o.stop(start + .23); o.onended = () => { o.disconnect(); g.disconnect(); };
       });
     } catch {}
   }
   document.addEventListener('click', e => {
     const button = e.target.closest('button');
     if (!button || button.disabled) return;
-    cue(button.id === 'route-toggle' ? 'engage' : /zoom|scanner/.test(button.id) ? 'zoom' : 'tap');
+    cue(button.dataset.view === 'port' || /connect-port/.test(button.id) ? 'port' : button.id === 'route-toggle' ? 'engage' : /zoom|scanner/.test(button.id) ? 'zoom' : 'tap');
     button.classList.remove('hud-pressed');
     if (options.animations && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
       button.animate([{filter:'brightness(1.8)'},{filter:'brightness(1)'}],{duration:260});
