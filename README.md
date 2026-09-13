@@ -1,4 +1,4 @@
-# FRONTIER / ED-inspired cockpit mockup
+# Surface Command / ED-inspired cockpit mockup
 
 An interactive, phone-first dashboard prototype for a 2016 Nissan Frontier. Plain HTML, CSS and JavaScript; no install, build step, external assets, API keys or frameworks.
 

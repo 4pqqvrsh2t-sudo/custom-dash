@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="120" fill="#111827"/>
-  <path d="M118 122c0-29 24-52 53-52h121c44 0 80 36 80 80v64H206c-49 0-88-40-88-88v-4Z" fill="#57e389"/>
-  <path d="M394 390c0 29-24 52-53 52H220c-44 0-80-36-80-80v-64h166c49 0 88 40 88 88v4Z" fill="#77a8ff"/>
-  <circle cx="195" cy="144" r="16" fill="#0b1020"/>
-  <circle cx="317" cy="368" r="16" fill="#0b1020"/>
-  <text x="256" y="281" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="92" font-weight="800" fill="#f7f9ff">Py</text>
-</svg>
