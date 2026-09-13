@@ -1,14 +1,14 @@
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const tracks=[['DEEP SPACE SIGNAL',110,88.3],['AFTER THE ORBIT',146.83,94.7],['DISTANT HORIZONS',130.81,101.9]];
-let ctx,ambient=[],gain,playing=false,playPending=false,track=0,position=0,localURL=null,localName='',source='radio',toastTimer,scanTimer,scanToken=0,scanning=false,scanTarget=0,playToken=0;
+let ctx,ambient=[],gain,playing=false,playPending=false,track=0,position=0,localURL=null,localName='',source='radio',toastTimer,scanTimer,scanToken=0,scanning=false,scanTarget=0,playToken=0,scanResume=false;
 let prefs={motion:true,glow:true,sounds:false,intensity:100,volume:25};
 try{const saved=JSON.parse(localStorage.getItem('frontier-prefs')||'{}');for(const k of ['motion','glow','sounds'])if(typeof saved[k]==='boolean')prefs[k]=saved[k];for(const k of ['intensity','volume'])if(Number.isFinite(saved[k]))prefs[k]=Math.min(100,Math.max(k==='intensity'?50:0,saved[k]));}catch{}
 for(const key of ['motion','glow','sounds'])$('#'+key).checked=prefs[key];$('#intensity').value=prefs.intensity;$('#volume').value=prefs.volume;
 function applyPrefs(){document.body.classList.toggle('no-glow',!prefs.glow);document.documentElement.style.setProperty('--intensity',prefs.intensity/100);try{localStorage.setItem('frontier-prefs',JSON.stringify(prefs))}catch{}}
 applyPrefs();
 function audioContext(){if(!ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('Audio unavailable');ctx=new Audio();}return ctx;}
-function clickSound(){if(!prefs.sounds)return;try{const c=audioContext();c.resume().catch(()=>{});const o=c.createOscillator(),g=c.createGain();o.frequency.value=650;g.gain.setValueAtTime(.015,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.065);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.07);o.onended=()=>{o.disconnect();g.disconnect();};}catch{}}
+function clickSound(){} // Centralized feedback lives in enhancements.js.
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2400);}
 function showView(view){if(view==='media')view='radio';if(!['cockpit','navigation','data','radio','spotify','systems'].includes(view))view='cockpit';$$('.view').forEach(e=>e.classList.toggle('active',e.id===view));$$('nav button').forEach(b=>{if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});history.replaceState(null,'','#'+view);$('#main').scrollTop=0;if(view==='data')renderData();}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>{clickSound();showView(b.dataset.view);}));window.addEventListener('hashchange',()=>showView(location.hash.slice(1)));
@@ -39,7 +39,7 @@ async function togglePlay(){
   finally{if(token===playToken){playPending=false;updatePlay();}}
 }
 function chooseTrack(index){
-  const resume=playing||scanning;cancelScan();stopPlayback();if(source==='spotify')disconnectSpotify();releaseLocal();position=0;scanTarget=(index+tracks.length)%tracks.length;
+  const resume=playing||(scanning&&scanResume);scanResume=resume;cancelScan();stopPlayback();if(source==='spotify')disconnectSpotify();releaseLocal();position=0;scanTarget=(index+tracks.length)%tracks.length;
   scanning=true;const token=++scanToken,target=scanTarget,start=tracks[track][2],finish=tracks[target][2];$('#radio').classList.add('scanning');$('#tuner-state').textContent='SCANNING BAND';$('#station-id').textContent='SEEK / SEARCHING CHANNELS';updatePlay();if(resume&&!document.hidden)scanNoise();
   let step=0;const total=10;scanTimer=setInterval(()=>{if(token!==scanToken)return;step++;displayFrequency(start+(finish-start)*step/total);$('#station-id').textContent='SEEK / '+(start+(finish-start)*step/total).toFixed(1)+' MHz';if(step>=total){clearInterval(scanTimer);track=target;scanning=false;$('#radio').classList.remove('scanning');stopAmbient();displayFrequency(finish);$('#tuner-state').textContent='SIGNAL LOCKED';$('#station-id').textContent='CH 0'+(track+1)+' / '+tracks[track][0];updateNames();updateProgress();updatePlay();if(resume&&!document.hidden)togglePlay();}},120);
 }
