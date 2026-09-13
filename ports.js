@@ -3,7 +3,7 @@
   const supported = 'serial' in navigator && window.isSecureContext;
   let port=null, reader=null, task=null, busy=false, stopping=false, identified=false;
   let packets=0, errors=0, last=0, lastSensors=0, lastPower=0, sensors=[], pinReport=[], pinTime=0, usbPower=null;
-  const text=(id,value)=>$('#'+id).textContent=value;
+  const text=(id,value)=>{const element=$('#'+id);if(element)element.textContent=value;};
   function controls() {
     $('#connect-port').disabled=!supported||busy||!!port;
     $('#disconnect-port').disabled=busy||!port;
@@ -12,7 +12,7 @@
   function render() {
     const now=Date.now(), stale=last && now-last>5000;
     const state=port ? last ? stale?'STALE / NO DATA':identified?'DEVICE ONLINE':'DATA / UNIDENTIFIED':'OPEN / WAITING' : 'NOT OPEN';
-    text('port-state',state); text('cockpit-port-state',state);
+    text('port-state',state);
     text('port-packets',packets); text('port-errors',errors);
     text('port-age',last?Math.floor((now-last)/1000)+'s AGO':'—');
     text('esp-power',lastPower ? (!port||now-lastPower>5000?'STALE / ':'')+(usbPower?'PRESENT / REPORTED':'ABSENT / REPORTED') : 'NOT REPORTED');
