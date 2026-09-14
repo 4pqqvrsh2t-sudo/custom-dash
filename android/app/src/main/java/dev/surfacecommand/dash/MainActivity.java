@@ -17,7 +17,7 @@ public class MainActivity extends Activity {
     private GeolocationPermissions.Callback pendingGeoCallback;
     private String pendingGeoOrigin;
     private static final int NOTIFICATION_REQUEST=1,CAMERA_REQUEST=2,LOCATION_REQUEST=3;
-    private static final String HOME = "https://4pqqvrsh2t-sudo.github.io/custom-dash/index.html?v=18#cockpit";
+    private static final String HOME = "https://4pqqvrsh2t-sudo.github.io/custom-dash/index.html?v=19#cockpit";
     private static final String CHANNEL = "cockpit_return";
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
