@@ -5,8 +5,10 @@
   root.EdgeTabs=api;
   if(typeof document!=='undefined')api.install();
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
-  const tabs=['cockpit','navigation','data','radio','spotify','cargo','proximity','port','systems'];
+  const tabs=['cockpit','navigation','data','radio','cargo','systems'];
+  const parents={proximity:'navigation',spotify:'radio',port:'systems'};
   function adjacent(current,direction){
+    current=parents[current]||current;
     const index=Math.max(0,tabs.indexOf(current));
     return tabs[(index+(direction==='next'?1:-1)+tabs.length)%tabs.length];
   }
