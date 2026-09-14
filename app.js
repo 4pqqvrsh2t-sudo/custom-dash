@@ -1,13 +1,29 @@
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const tracks=[['DEEP SPACE SIGNAL',110,88.3],['AFTER THE ORBIT',146.83,94.7],['DISTANT HORIZONS',130.81,101.9]];
-let ctx,ambient=[],gain,playing=false,playPending=false,track=0,position=0,localURL=null,localName='',source='radio',toastTimer,scanTimer,scanToken=0,scanning=false,scanTarget=0,playToken=0,scanResume=false;
+let ctx,ambient=[],gain,idleNodes=[],idleGain=null,playing=false,playPending=false,track=0,position=0,localURL=null,localName='',source='radio',toastTimer,scanTimer,scanToken=0,scanning=false,scanTarget=0,playToken=0,scanResume=false;
 let prefs={motion:true,glow:true,sounds:false,intensity:100,volume:25};
 try{const saved=JSON.parse(localStorage.getItem('frontier-prefs')||'{}');for(const k of ['motion','glow','sounds'])if(typeof saved[k]==='boolean')prefs[k]=saved[k];for(const k of ['intensity','volume'])if(Number.isFinite(saved[k]))prefs[k]=Math.min(100,Math.max(k==='intensity'?50:0,saved[k]));}catch{}
 for(const key of ['motion','glow','sounds'])$('#'+key).checked=prefs[key];$('#intensity').value=prefs.intensity;$('#volume').value=prefs.volume;
 function applyPrefs(){document.body.classList.toggle('no-glow',!prefs.glow);document.documentElement.style.setProperty('--intensity',prefs.intensity/100);try{localStorage.setItem('frontier-prefs',JSON.stringify(prefs))}catch{}}
 applyPrefs();
 function audioContext(){if(!ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('Audio unavailable');ctx=new Audio();}return ctx;}
+function stopIdleBed(){idleNodes.forEach(n=>{try{n.stop?.();n.disconnect()}catch{}});idleNodes=[];if(idleGain){try{idleGain.disconnect()}catch{}idleGain=null;}}
+function musicChannelActive(){return playing||playPending||scanning||source==='spotify';}
+function syncIdleBed(){
+  if(document.hidden||document.body.classList.contains('booting')||musicChannelActive()){stopIdleBed();return}
+  try{
+    const c=audioContext();if(c.state!=='running'||idleNodes.length)return;
+    idleGain=c.createGain();idleGain.gain.value=.018*prefs.volume/100;idleGain.connect(c.destination);
+    const hum=c.createOscillator(),harmonic=c.createOscillator(),harmonicGain=c.createGain(),lfo=c.createOscillator(),lfoGain=c.createGain();
+    hum.type='sine';hum.frequency.value=47;harmonic.type='triangle';harmonic.frequency.value=94.3;harmonicGain.gain.value=.18;
+    lfo.frequency.value=.13;lfoGain.gain.value=.0035*prefs.volume/100;lfo.connect(lfoGain).connect(idleGain.gain);
+    hum.connect(idleGain);harmonic.connect(harmonicGain).connect(idleGain);hum.start();harmonic.start();lfo.start();idleNodes.push(hum,harmonic,lfo,harmonicGain,lfoGain);
+    const buffer=c.createBuffer(1,c.sampleRate*2,c.sampleRate),samples=buffer.getChannelData(0);for(let i=0;i<samples.length;i++)samples[i]=(Math.random()*2-1)*.12;
+    const noise=c.createBufferSource(),filter=c.createBiquadFilter(),noiseGain=c.createGain();noise.buffer=buffer;noise.loop=true;filter.type='lowpass';filter.frequency.value=520;noiseGain.gain.value=.2;noise.connect(filter).connect(noiseGain).connect(idleGain);noise.start();idleNodes.push(noise,filter,noiseGain);
+  }catch{}
+}
+window.SurfaceAudio={syncIdleBed,stopIdleBed};
 function clickSound(){} // Centralized feedback lives in enhancements.js.
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2400);}
 function showView(view){if(view==='media')view='radio';if(!['cockpit','navigation','data','radio','spotify','systems','port','proximity'].includes(view))view='cockpit';$$('.view').forEach(e=>e.classList.toggle('active',e.id===view));$$('nav button').forEach(b=>{if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});history.replaceState(null,'','#'+view);$('#main').scrollTop=0;if(view==='data')renderData();}
@@ -16,6 +32,7 @@ function updatePlay(){
   $$('.play').forEach(b=>{const external=source==='spotify'&&!b.closest('#radio');b.textContent=external?'↗':scanning?'■':playing?'Ⅱ':'▶';b.setAttribute('aria-label',external?'Open Spotify player':scanning?'Cancel station scan':playing?'Pause audio':'Play audio');b.setAttribute('aria-pressed',String(!external&&playing));b.disabled=playPending;});
   document.body.classList.toggle('radio-playing',playing&&!scanning&&source==='radio');
   $('#cockpit-now-playing').hidden=!(playing&&!scanning);
+  syncIdleBed();
 }
 function updateNames(){
   const name=localURL?localName:tracks[track][0];$$('.track-name').forEach(e=>e.textContent=source==='spotify'&&!e.closest('#radio')?'SPOTIFY / PLAYER LOADED':name);
@@ -51,7 +68,7 @@ $('#waveform').innerHTML=Array.from({length:55},(_,i)=>`<i style="height:${15+Ma
 function formatTime(n){if(!Number.isFinite(n))return '0:00';return `${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,'0')}`;}
 function updateProgress(){const p=localURL?$('#audio').currentTime:position;$('#seek').value=p;$('#elapsed').textContent=formatTime(p);}
 $('#seek').oninput=e=>{if(localURL&&Number.isFinite($('#audio').duration))$('#audio').currentTime=Number(e.target.value);else position=Number(e.target.value);updateProgress();};
-$('#volume').oninput=e=>{prefs.volume=Number(e.target.value);$('#audio').volume=prefs.volume/100;if(gain)gain.gain.value=prefs.volume/100*.07;applyPrefs();};$('#audio').volume=prefs.volume/100;
+$('#volume').oninput=e=>{prefs.volume=Number(e.target.value);$('#audio').volume=prefs.volume/100;if(gain)gain.gain.value=prefs.volume/100*.07;if(idleGain)idleGain.gain.value=.018*prefs.volume/100;applyPrefs();};$('#audio').volume=prefs.volume/100;
 $('#audio-file').onchange=e=>{const f=e.target.files[0];if(!f)return;cancelScan();stopPlayback();if(source==='spotify')disconnectSpotify();releaseLocal();localURL=URL.createObjectURL(f);localName=f.name.replace(/\.[^.]+$/,'');$('#audio').src=localURL;position=0;$('#seek').max=0;$('#duration').textContent='0:00';$('#tuner-state').textContent='AUXILIARY INPUT';$('#station-id').textContent='LOCAL FILE / NO BROADCAST';updateNames();updatePlay();updateProgress();toast('Audio loaded. Press play.');};
 $('#audio').addEventListener('loadedmetadata',()=>{if(localURL&&Number.isFinite($('#audio').duration)){$('#seek').max=$('#audio').duration;$('#duration').textContent=formatTime($('#audio').duration);}});
 $('#audio').addEventListener('timeupdate',updateProgress);
@@ -85,4 +102,6 @@ $('#freeze-data').onclick=()=>{frozenSnapshot=frozenSnapshot?null:telemetry.snap
 $('#reset-data').onclick=()=>{telemetry.reset();frozenSnapshot=null;$('#freeze-data').textContent='FREEZE GRAPHS';$('#capture-status').textContent='● RECORDING';$('#capture-status').classList.remove('frozen');renderData();toast('Telemetry session reset');};
 function tick(){if(document.hidden)return;$('#clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});updateTelemetry(telemetry.sample(prefs.motion));if(playing&&!localURL&&!scanning){position++;if(position>=180)position=0;updateProgress();}if(routeRunning){routeProgress=Math.min(1,routeProgress+1/90);if(routeProgress>=1){routeRunning=false;$('#route-toggle').textContent='REPLAY ROUTE';$('#route-state').textContent='DESTINATION REACHED';toast('Destination reached');}renderRoute();}}
 updateNames();updatePlay();displayFrequency(tracks[track][2]);renderRoute();renderData();showView(location.hash.slice(1));tick();setInterval(tick,1000);
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(scanning){cancelScan();playing=false;}if(playing&&!localURL)stopPlayback();updatePlay();}else if(ctx&&ctx.state==='suspended'&&playing&&!localURL){stopPlayback();}});
+document.addEventListener('surface-startup-complete',syncIdleBed);
+document.addEventListener('pointerdown',()=>{if(!document.body.classList.contains('booting')){try{audioContext().resume().then(syncIdleBed).catch(()=>{})}catch{}}},{once:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){stopIdleBed();if(scanning){cancelScan();playing=false;}if(playing&&!localURL)stopPlayback();updatePlay();}else if(ctx&&ctx.state==='suspended'&&playing&&!localURL){stopPlayback();}else syncIdleBed();});
