@@ -95,3 +95,10 @@ main{position:relative}.view{position:relative;isolation:isolate;min-height:calc
 @media(prefers-reduced-motion:reduce){#radio:after{animation:none}}
 nav{grid-template-columns:repeat(9,minmax(0,1fr));min-width:0;max-width:100%;overflow:hidden}.hardware-unavailable{color:#eab065}
 @media(max-width:650px) and (orientation:portrait){nav{grid-template-columns:repeat(9,minmax(0,1fr))!important}nav button{flex:1 1 0!important;min-width:0!important;width:0!important;overflow:hidden;font-size:4.5px!important;letter-spacing:0!important}.view{min-height:calc(100svh - 155px)}}
+
+/* Build 15: six driving-level tabs with contextual sub-tabs. */
+nav{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+.subtabs{display:flex;align-items:center;gap:1px;margin:-5px 4px 12px;border-block:1px solid #6f3b1f;background:#05090bd9;overflow:hidden}
+.subtabs button{flex:1 1 0;min-width:0;min-height:36px;padding:6px 10px;border:0;border-inline:1px solid #40291c;background:#120d0a;color:#ad6a38;font-size:9px;letter-spacing:1.2px;clip-path:none}
+.subtabs button[aria-current]{background:linear-gradient(90deg,#f28a32,#c95410);color:#130b06}
+@media(max-width:650px) and (orientation:portrait){nav{grid-template-columns:repeat(6,minmax(0,1fr))!important}.subtabs{margin:0 3px 9px}.subtabs button{width:auto!important;min-height:32px;font-size:8px!important;letter-spacing:.7px!important}}
