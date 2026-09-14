@@ -26,7 +26,15 @@ function syncIdleBed(){
 window.SurfaceAudio={syncIdleBed,stopIdleBed};
 function clickSound(){} // Centralized feedback lives in enhancements.js.
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2400);}
-function showView(view){if(view==='media')view='radio';if(!['cockpit','navigation','data','radio','spotify','systems','port','proximity','cargo'].includes(view))view='cockpit';$$('.view').forEach(e=>e.classList.toggle('active',e.id===view));$$('nav button').forEach(b=>{if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});history.replaceState(null,'','#'+view);$('#main').scrollTop=0;if(view==='data')renderData();}
+function installNavigationGroups(){
+  const top=$('nav[aria-label="Main navigation"]');
+  top.querySelector('[data-view="spotify"]')?.remove();top.querySelector('[data-view="port"]')?.remove();
+  const media=top.querySelector('[data-view="radio"]');if(media)media.innerHTML='<span>◉</span>MEDIA';
+  const groups={navigation:[['navigation','ROUTE'],['proximity','PROXIMITY']],radio:[['radio','RADIO'],['spotify','SPOTIFY']],spotify:[['radio','RADIO'],['spotify','SPOTIFY']],systems:[['systems','SYSTEMS'],['port','PORTS']],port:[['systems','SYSTEMS'],['port','PORTS']]};
+  for(const [sectionId,tabs] of Object.entries(groups)){const section=$('#'+sectionId);if(!section)continue;const bar=document.createElement('div');bar.className='subtabs';bar.setAttribute('aria-label',sectionId+' sections');for(const [view,label] of tabs){const button=document.createElement('button');button.dataset.view=view;button.textContent=label;bar.append(button)}section.querySelector('.section-heading').after(bar)}
+}
+installNavigationGroups();
+function showView(view){if(view==='media')view='radio';if(!['cockpit','navigation','data','radio','spotify','systems','port','proximity','cargo'].includes(view))view='cockpit';const parent={proximity:'navigation',spotify:'radio',port:'systems'}[view]||view;$$('.view').forEach(e=>e.classList.toggle('active',e.id===view));$$('nav button').forEach(b=>{if(b.dataset.view===parent)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});$$('.subtabs [data-view]').forEach(b=>{if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});history.replaceState(null,'','#'+view);$('#main').scrollTop=0;if(view==='data')renderData();}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>{clickSound();showView(b.dataset.view);}));window.addEventListener('hashchange',()=>showView(location.hash.slice(1)));
 function updatePlay(){
   $$('.play').forEach(b=>{const external=source==='spotify'&&!b.closest('#radio');b.textContent=external?'↗':scanning?'■':playing?'Ⅱ':'▶';b.setAttribute('aria-label',external?'Open Spotify player':scanning?'Cancel station scan':playing?'Pause audio':'Play audio');b.setAttribute('aria-pressed',String(!external&&playing));b.disabled=playPending;});
