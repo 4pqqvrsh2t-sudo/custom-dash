@@ -11,7 +11,7 @@
     save(){try{this.storage?.setItem('surface-cargo',JSON.stringify(this.items))}catch{}}
   }
   function install(){
-    let storage=null;try{storage=root.localStorage}catch{}const q=s=>document.querySelector(s),video=q('#cargo-camera'),canvas=q('#cargo-capture'),status=q('#cargo-status'),inventory=new CargoInventory(storage);let stream=null,analyzer=null,lastSpeed=null,captured=false,visionSuggested=false;
+    let storage=null;try{storage=globalThis.localStorage}catch{}const q=s=>document.querySelector(s),video=q('#cargo-camera'),canvas=q('#cargo-capture'),status=q('#cargo-status'),inventory=new CargoInventory(storage);let stream=null,analyzer=null,lastSpeed=null,captured=false,visionSuggested=false;
     const setStatus=(message,state='')=>{status.textContent=message;status.dataset.state=state};
     function stopped(){return lastSpeed===null||lastSpeed<.5}
     function stopCamera(message='CAMERA OFFLINE'){
@@ -38,9 +38,9 @@
     q('#start-camera').onclick=startCamera;q('#stop-camera').onclick=()=>stopCamera();q('#capture-cargo').onclick=capture;
     q('#cargo-form').onsubmit=e=>{e.preventDefault();try{inventory.add({label:q('#cargo-label').value,category:q('#cargo-category').value,quantity:Number(q('#cargo-quantity').value),source:visionSuggested?'vision':captured?'camera':'verified'});q('#cargo-form').reset();q('#cargo-quantity').value=1;canvas.hidden=true;captured=false;visionSuggested=false;setStatus('VERIFIED ITEM ADDED / IMAGE DISCARDED');render()}catch(error){setStatus(error.message.toUpperCase(),'warning')}};
     q('#manual-cargo').onclick=()=>{captured=false;visionSuggested=false;canvas.hidden=true;q('#cargo-label').focus();setStatus('MANUAL ENTRY / VERIFY BEFORE ADDING')};
-    root.addEventListener('surface-telemetry',e=>{lastSpeed=Number.isFinite(e.detail?.speed)?e.detail.speed:null;if(lastSpeed>=.5&&stream)stopCamera('CAMERA STOPPED / VEHICLE MOVING')});
+    globalThis.addEventListener('surface-telemetry',e=>{lastSpeed=Number.isFinite(e.detail?.speed)?e.detail.speed:null;if(lastSpeed>=.5&&stream)stopCamera('CAMERA STOPPED / VEHICLE MOVING')});
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCamera('CAMERA OFFLINE / APP BACKGROUNDED')});
-    root.SurfaceCargo={setAnalyzer(fn){if(typeof fn!=='function')throw Error('Analyzer must be a function.');analyzer=fn;q('#vision-state').textContent='VISION PROVIDER CONNECTED';},clearAnalyzer(){analyzer=null;q('#vision-state').textContent='VISION PROVIDER NOT CONNECTED';},categories:[...CATEGORIES]};render();
+    globalThis.SurfaceCargo={setAnalyzer(fn){if(typeof fn!=='function')throw Error('Analyzer must be a function.');analyzer=fn;q('#vision-state').textContent='VISION PROVIDER CONNECTED';},clearAnalyzer(){analyzer=null;q('#vision-state').textContent='VISION PROVIDER NOT CONNECTED';},categories:[...CATEGORIES]};render();
   }
   return {CargoInventory,CATEGORIES,install};
 });
