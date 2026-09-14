@@ -93,5 +93,5 @@ main{position:relative}.view{position:relative;isolation:isolate;min-height:calc
 .metric-readout select{width:auto;max-width:210px}.metric-readout small{color:#8fb9b7;letter-spacing:.7px}
 @keyframes transmission-pulse{0%{opacity:.18;transform:scale(.82)}35%{opacity:.7}100%{opacity:.08;transform:scale(1.18)}}
 @media(prefers-reduced-motion:reduce){#radio:after{animation:none}}
-nav{grid-template-columns:repeat(9,minmax(72px,1fr));overflow-x:auto;scrollbar-width:thin}.hardware-unavailable{color:#eab065}
-@media(max-width:650px) and (orientation:portrait){nav{grid-template-columns:repeat(9,minmax(42px,1fr))!important}nav button{min-width:42px!important;font-size:5px!important}.view{min-height:calc(100svh - 155px)}}
+nav{grid-template-columns:repeat(9,minmax(0,1fr));min-width:0;max-width:100%;overflow:hidden}.hardware-unavailable{color:#eab065}
+@media(max-width:650px) and (orientation:portrait){nav{grid-template-columns:repeat(9,minmax(0,1fr))!important}nav button{min-width:0!important;width:auto!important;overflow:hidden;font-size:4.8px!important;letter-spacing:0!important}.view{min-height:calc(100svh - 155px)}}
