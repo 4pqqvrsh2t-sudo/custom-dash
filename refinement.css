@@ -1,0 +1,9 @@
+/* Instrument framing gives idle surfaces structure without inventing readings. */
+.cockpit-scanner{background:radial-gradient(ellipse at 50% 50%,#6e36151c,transparent 70%),repeating-linear-gradient(0deg,transparent 0 23px,#e38b2710 24px),#080d0f;position:relative;border-left:2px solid #c77b32;border-right:2px solid #c77b324d}
+.cockpit-scanner:after{content:'';position:absolute;left:12px;right:12px;bottom:5px;height:3px;background:repeating-linear-gradient(90deg,#cf84334d 0 2px,transparent 2px 12px);pointer-events:none}
+.confidence-area{transition:rx .2s,ry .2s,fill .2s;pointer-events:none}
+#proximity-scope{overflow:hidden;background:radial-gradient(ellipse,#82512217,transparent 70%)}
+.stream-label{font-size:10px;letter-spacing:.12em;color:#9adbe3}
+.input-alert{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #d38a39;background:#261907;padding:10px 14px;margin-bottom:12px;font-size:11px;letter-spacing:.08em}
+.input-alert[hidden]{display:none}.input-alert span{overflow-wrap:anywhere}.input-alert button{flex-shrink:0}.input-alert[data-severity=critical]{border-color:#ff7757;background:#29120e;color:#ffb699}
+@media(prefers-reduced-motion:reduce){.confidence-area{transition:none}}

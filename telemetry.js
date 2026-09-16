@@ -9,7 +9,7 @@ class TelemetrySession {
     for(const key of allowed)if(Number.isFinite(values[key]))row[key]=values[key];
     if(Number.isFinite(row.speed)){this.distance+=row.speed*safeDt/3600;this.speedSum+=row.speed;this.speedCount++;}
     if(Number.isFinite(row.rpm))this.peak=this.peak===null?row.rpm:Math.max(this.peak,row.rpm);
-    this.count++;this.history.push(row);if(this.history.length>121)this.history.shift();return {...row};
+    this.count++;this.history.push(row);if(this.history.length>600)this.history.shift();return {...row};
   }
   snapshot(){return {elapsed:this.elapsed,distance:this.distance,average:this.speedCount?this.speedSum/this.speedCount:null,peak:this.peak,count:this.count,speedCount:this.speedCount,history:this.history.map(x=>({...x}))};}
 }

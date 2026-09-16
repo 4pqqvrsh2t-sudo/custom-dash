@@ -2,7 +2,7 @@
 // Optional presentation layer; no network requests or character recordings.
 (() => {
   const synth = window.speechSynthesis;
-  let options = {voice:true, animations:true, voiceURI:''}, voices = [], scannerZoom = 1;
+  let options = {voice:true, animations:true, voiceURI:''}, voices = [];
   try { Object.assign(options, JSON.parse(localStorage.getItem('surface-feedback') || '{}')); } catch {}
   options.voice = options.voice === true;
   options.animations = options.animations !== false;
@@ -69,17 +69,7 @@
   routeObserver.observe($('#route-state'), {childList:true});
   const tunerObserver = new MutationObserver(() => { if (!scanning && $('#tuner-state').textContent === 'SIGNAL LOCKED') cue('lock'); });
   tunerObserver.observe($('#tuner-state'), {childList:true});
-  function renderScanner() {
-    $('#scanner-world').style.transform = `translate(${180 - 180 * scannerZoom}px, ${110 - 110 * scannerZoom}px) scale(${scannerZoom})`;
-    $('#scanner-range').textContent = (2 / scannerZoom).toFixed(1) + ' MI';
-    $('#scanner-reset').textContent = scannerZoom.toFixed(1) + '× RANGE';
-    $('#scanner-in').disabled = scannerZoom >= 4; $('#scanner-out').disabled = scannerZoom <= .5;
-    $('#scanner-svg').setAttribute('aria-label', `Simulated proximity scanner, ${(2 / scannerZoom).toFixed(1)} mile range, ${scannerZoom} times zoom`);
-  }
-  $('#scanner-in').onclick = () => { scannerZoom = Math.min(4, scannerZoom + .5); renderScanner(); };
-  $('#scanner-out').onclick = () => { scannerZoom = Math.max(.5, scannerZoom - .5); renderScanner(); };
-  $('#scanner-reset').onclick = () => { scannerZoom = 1; renderScanner(); };
   document.addEventListener('visibilitychange', () => { if (document.hidden && synth) { synth.cancel(); document.body.classList.remove('voice-active'); } });
-  apply(); populateVoices(); renderScanner();
+  apply(); populateVoices();
   if (synth) synth.addEventListener('voiceschanged', populateVoices);
 })();

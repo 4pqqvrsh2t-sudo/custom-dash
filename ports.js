@@ -13,6 +13,10 @@
     const now=Date.now(), stale=last && now-last>5000;
     const state=port ? last ? stale?'STALE / NO DATA':identified?'DEVICE ONLINE':'DATA / UNIDENTIFIED':'OPEN / WAITING' : 'NOT OPEN';
     text('port-state',state);
+    const alert=(id,on,label)=>window.SurfaceAlerts?.update(id,on,stopping?'info':'warning',label);
+    alert('serial',!!port&&!stale,'ESP32 link');
+    sensors.forEach(v=>alert('sensor:'+v.id,!!port&&now-lastSensors<=5000,v.id));
+    pinReport.forEach(v=>alert('pin:'+v.gpio,!!port&&now-pinTime<=5000&&v.connected,'GPIO '+v.gpio));
     text('port-packets',packets); text('port-errors',errors);
     text('port-age',last?Math.floor((now-last)/1000)+'s AGO':'—');
     text('esp-power',lastPower ? (!port||now-lastPower>5000?'STALE / ':'')+(usbPower?'PRESENT / REPORTED':'ABSENT / REPORTED') : 'NOT REPORTED');
@@ -32,9 +36,10 @@
     try {
       const p=SurfaceProtocol.parse(line);packets++;last=Date.now();
       if (p.type==='hello') {identified=true;text('port-device',p.device);text('port-firmware',p.firmware);}
-      if (p.type==='sensors') {sensors=p.values;lastSensors=last;}
-      if(p.type==='pins'){pinReport=p.pins;pinTime=last;}
+      if (p.type==='sensors') {sensors.filter(v=>!p.values.some(n=>n.id===v.id)).forEach(v=>window.SurfaceAlerts?.update('sensor:'+v.id,false,'warning',v.id));sensors=p.values;lastSensors=last;}
+      if(p.type==='pins'){pinReport.filter(v=>!p.pins.some(n=>n.gpio===v.gpio)).forEach(v=>window.SurfaceAlerts?.update('pin:'+v.gpio,false,'warning','GPIO '+v.gpio));pinReport=p.pins;pinTime=last;}
       if (p.type==='power') {usbPower=p.usb_present;lastPower=last;}
+    render();
     } catch {errors++;}
   }
   async function read(opened) {
