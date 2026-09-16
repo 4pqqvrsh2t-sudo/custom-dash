@@ -17,6 +17,10 @@ if(typeof window!=='undefined')(()=>{
   toggle.onchange=()=>{enabled=toggle.checked;try{localStorage.setItem('surface-sensor-alerts',enabled?'on':'off');}catch{}};
   const banner=document.createElement('div');banner.className='input-alert';banner.hidden=true;banner.setAttribute('role','status');document.querySelector('main').prepend(banner);
   const rank={info:0,warning:1,critical:2};
+  function playTone(severity,c){
+        const notes=severity==='critical'?[220,110,220]:severity==='warning'?[180,120]:[130];
+        notes.forEach((frequency,i)=>{const t=c.currentTime+i*.16,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(frequency,t);o.frequency.exponentialRampToValueAtTime(frequency*.75,t+.12);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,.16*prefs.volume/100),t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+.14);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.15);});
+  }
   const monitor=new SensorAlertMonitor(event=>{
     pending.push(event);if(timer)return;
     timer=setTimeout(()=>{
@@ -27,10 +31,10 @@ if(typeof window!=='undefined')(()=>{
       if(!enabled)return;
       try{
         const c=audioContext();if(c.state!=='running'){label.textContent+=' / SOUND NOT READY';return;}
-        const notes=top.severity==='critical'?[220,110,220]:top.severity==='warning'?[180,120]:[130];
-        notes.forEach((frequency,i)=>{const t=c.currentTime+i*.16,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(frequency,t);o.frequency.exponentialRampToValueAtTime(frequency*.75,t+.12);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,.16*prefs.volume/100),t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+.14);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.15);});
+        playTone(top.severity,c);
       }catch{label.textContent+=' / SOUND UNAVAILABLE';}
     },120);
   });
+  monitor.testTone=severity=>{try{const c=audioContext();if(c.state==='running')playTone(severity,c);}catch{}};
   window.SurfaceAlerts=monitor;
 })();

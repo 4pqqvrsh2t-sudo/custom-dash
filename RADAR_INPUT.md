@@ -1,0 +1,11 @@
+# Radar input and system test
+
+`SurfacePerception.ingestContacts(contacts, coverage)` accepts a complete fresh tracker snapshot. Empty arrays report a live frame with no contacts. Invalid frames do not refresh the feed; three seconds without a valid frame clears contacts and reports a lost feed.
+
+Each contact supplies `id` (stable object identity from your detector/tracker), `type`, `distanceMeters`, `bearingDegrees`, and `confidence` (0–1, or null for unknown). Optional `headingDegrees` is the target heading relative to the truck's forward direction: 0 forward, 90 right. It must come from sensor fusion or the detector, not the bearing to the target. Without heading a vehicle is a rectangle. Human/person/pedestrian uses a triangle, animal/dog/cat/deer a square, and other classes a dotted circle. Select a symbol or its list row for confidence.
+
+Coverage is an array of `{radiusMeters, confidence}` defining concentric zones centered on the truck. Each radius is the outer edge of a band; the smallest radius covers the center. Supply calibrated, sensor-supported confidence for each band. No coverage means unshaded range rings, not presumed visibility or safety. Target classification confidence is separate from coverage confidence. The preview and system test use labeled example zones. Display range is not sensor reach.
+
+Arrival and departure tones are grouped with a global 2.5-second cooldown. Missing contacts have a 1.2-second grace period. The fifth appearance after repeated disappearances mutes that identity. Identities expire after five minutes absent. A feed outage resets tracking without playing a departure for every target. Missing IDs are silent: the dashboard does not perform camera re-identification or invent identities. Detector ID changes cannot reliably be recognized as the same physical object.
+
+Systems → Run System Stress Test walks the UI, symbols, audio cues, a 200-contact render, a 600-sample isolated chart, speed conversion and example pins. It never injects synthetic telemetry into the live session. Use while parked. Stop restores the prior tab, scanner range and pin preview; reported motion also stops the test. This exercises software displays and sound paths; it does not validate sensor accuracy, a camera model, hardware connections or road performance. Browser audio must be unlocked by tapping the test button.
