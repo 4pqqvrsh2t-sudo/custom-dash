@@ -35,7 +35,7 @@ jobs:
       - name: Check token wiring without printing values
         run: test -n "$MAPBOX_ACCESS_TOKEN" && test -n "$MAPBOX_DOWNLOADS_TOKEN"
       - name: Build debug APK
-        run: gradle -p android --no-daemon assembleDebug
+        run: gradle -p android --no-daemon assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: surface-command-debug
