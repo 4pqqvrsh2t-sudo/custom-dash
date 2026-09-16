@@ -21,6 +21,6 @@ MAPBOX_ACCESS_TOKEN=pk…
 MAPBOX_DOWNLOADS_TOKEN=sk…
 ```
 
-GitHub Actions reads both from repository secrets and publishes a debug APK artifact. The native map is real, but native destination search, route guidance, map-matched posted limits and location-puck wiring are still marked unavailable until their callbacks are implemented and road-tested. The HTML route remains a labeled simulation.
+GitHub Actions reads both from repository secrets and publishes a debug APK artifact. The native map starts Mapbox free drive after location permission and shows map-matched current speed plus a posted limit when Mapbox supplies one; unavailable values remain blank. Destination search, active route guidance and a production location puck are still pending road testing. The HTML route remains a labeled simulation.
 
 Before installation, obtain the head unit's actual Android API level and identify the original launcher. Verify home/return switching, display bounds, audio, standby/wake and rear-camera takeover while parked. Do not update MCU/Android firmware as part of this app installation.

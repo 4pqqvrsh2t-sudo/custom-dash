@@ -17,11 +17,36 @@ import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.Style;
+import com.mapbox.common.location.Location;
+import com.mapbox.navigation.base.formatter.DistanceFormatterOptions;
+import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.MapboxNavigationProvider;
+import com.mapbox.navigation.core.trip.session.LocationMatcherResult;
+import com.mapbox.navigation.core.trip.session.LocationObserver;
+import com.mapbox.navigation.tripdata.speedlimit.api.MapboxSpeedInfoApi;
+import com.mapbox.navigation.tripdata.speedlimit.model.PostedAndCurrentSpeedFormatter;
+import com.mapbox.navigation.tripdata.speedlimit.model.SpeedInfoValue;
 
 /** Real Mapbox map surface. Route search/guidance and matched posted-limit delivery are the next native layer. */
 public final class MapboxNavigationActivity extends Activity {
     private static final int LOCATION_REQUEST = 50;
     private MapView mapView;
+    private TextView status;
+    private MapboxNavigation navigation;
+    private final MapboxSpeedInfoApi speedInfoApi=new MapboxSpeedInfoApi();
+    private DistanceFormatterOptions distanceOptions;
+    private final LocationObserver locationObserver=new LocationObserver(){
+        @Override public void onNewRawLocation(Location rawLocation) {}
+        @Override public void onNewLocationMatcherResult(LocationMatcherResult result){
+            Location location=result.getEnhancedLocation();
+            mapView.getMapboxMap().setCamera(new CameraOptions.Builder().center(Point.fromLngLat(location.getLongitude(),location.getLatitude())).bearing(location.getBearing()).zoom(16.0).pitch(35.0).build());
+            SpeedInfoValue info=speedInfoApi.updatePostedAndCurrentSpeed(result,distanceOptions,new PostedAndCurrentSpeedFormatter());
+            if(info==null){status.setText("POSTED LIMIT  —   •   SPEED  —\nAWAITING ROAD MATCH");return;}
+            Integer posted=info.getPostedSpeed();String unit=String.valueOf(info.getPostedSpeedUnit()).contains("MILE")?"MPH":"KM/H";
+            status.setText("POSTED LIMIT  "+(posted==null?"—":posted)+" "+unit+"   •   SPEED  "+info.getCurrentSpeed()+" "+unit+"\nMAPBOX FREE DRIVE / ROAD MATCHED");
+        }
+    };
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -42,11 +67,17 @@ public final class MapboxNavigationActivity extends Activity {
         top.addView(close);top.addView(stateLabel,new LinearLayout.LayoutParams(0,ViewGroup.LayoutParams.WRAP_CONTENT,1));
         FrameLayout.LayoutParams topParams=new FrameLayout.LayoutParams(-1,ViewGroup.LayoutParams.WRAP_CONTENT,Gravity.TOP);root.addView(top,topParams);
 
-        TextView status=new TextView(this);status.setText("POSTED LIMIT  —   •   GPS MATCH REQUIRED\nMAP DATA IS LIVE; GUIDANCE IS NOT ACTIVE");status.setTextColor(Color.rgb(147,239,255));status.setTextSize(12);status.setGravity(Gravity.CENTER);status.setPadding(12,12,12,12);status.setBackgroundColor(Color.argb(225,8,11,13));
+        TextView marker=new TextView(this);marker.setText("▲");marker.setTextSize(24);marker.setTextColor(Color.rgb(147,239,255));marker.setGravity(Gravity.CENTER);FrameLayout.LayoutParams markerParams=new FrameLayout.LayoutParams(70,70,Gravity.CENTER);root.addView(marker,markerParams);
+        status=new TextView(this);status.setText("POSTED LIMIT  —   •   SPEED  —\nGPS MATCH REQUIRED");status.setTextColor(Color.rgb(147,239,255));status.setTextSize(12);status.setGravity(Gravity.CENTER);status.setPadding(12,12,12,12);status.setBackgroundColor(Color.argb(225,8,11,13));
         FrameLayout.LayoutParams bottom=new FrameLayout.LayoutParams(-1,ViewGroup.LayoutParams.WRAP_CONTENT,Gravity.BOTTOM);root.addView(status,bottom);
         setContentView(root);
-        if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_REQUEST);
+        distanceOptions=new DistanceFormatterOptions.Builder(getApplicationContext()).build();
+        if(checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},LOCATION_REQUEST);else startFreeDrive();
     }
-    @Override public void onRequestPermissionsResult(int code,String[] permissions,int[] results){super.onRequestPermissionsResult(code,permissions,results);if(code==LOCATION_REQUEST&&(results.length==0||results[0]!=PackageManager.PERMISSION_GRANTED))Toast.makeText(this,"Location denied. The map remains usable, but vehicle position is unavailable.",Toast.LENGTH_LONG).show();}
-    @Override protected void onDestroy(){mapView=null;super.onDestroy();}
+    private void startFreeDrive(){
+        navigation=MapboxNavigationProvider.isCreated()?MapboxNavigationProvider.retrieve():MapboxNavigationProvider.create(new NavigationOptions.Builder(getApplicationContext()).build());
+        navigation.registerLocationObserver(locationObserver);navigation.startTripSession(false);status.setText("POSTED LIMIT  —   •   SPEED  —\nACQUIRING GPS / ROAD MATCH");
+    }
+    @Override public void onRequestPermissionsResult(int code,String[] permissions,int[] results){super.onRequestPermissionsResult(code,permissions,results);if(code!=LOCATION_REQUEST)return;if(results.length>0&&results[0]==PackageManager.PERMISSION_GRANTED)startFreeDrive();else Toast.makeText(this,"Location denied. The map remains usable, but vehicle position is unavailable.",Toast.LENGTH_LONG).show();}
+    @Override protected void onDestroy(){if(navigation!=null){navigation.unregisterLocationObserver(locationObserver);navigation.stopTripSession();navigation=null;MapboxNavigationProvider.destroy();}mapView=null;super.onDestroy();}
 }
