@@ -2,9 +2,9 @@
 const assert=require('node:assert/strict'),g=require('../instruments'),p=require('../port-protocol');
 assert.equal(g.model(60).secondary,26.8224);assert.equal(g.model(60,'km/h').secondary,96.56064);
 assert.equal(g.metersPerSecondToMph(26.8224),60);assert.equal(g.metersPerSecondToMph(null),null);
-assert.equal(g.model(120).secondaryMax,53.6448);assert(Math.abs(g.model(120,'km/h').secondaryMax-193.12128)<1e-8);
-assert.equal(g.model(60).mphFraction,.5);assert.equal(g.model(0).mphFraction,0);assert.equal(g.model(120).mphFraction,1);
-assert.equal(g.model(60).secondaryFraction,.5);assert.equal(g.model(60,'km/h').secondaryFraction,.5);
+assert.equal(g.model(120).secondaryMax,71.5264);assert(Math.abs(g.model(120,'km/h').secondaryMax-257.49504)<1e-8);
+assert.equal(g.model(60).mphFraction,.375);assert.equal(g.model(0).mphFraction,0);assert.equal(g.model(160).mphFraction,1);
+assert.equal(g.model(60).secondaryFraction,.375);assert.equal(g.model(60,'km/h').secondaryFraction,.375);
 assert.equal(g.arc(145,0),'');assert.equal(g.model(200).mphFraction,1);assert.equal(g.model(NaN).speed,null);assert.equal(g.model(NaN).valid,false);
 assert.equal(p.parse('{"type":"pins","board":"esp32-classic","pins":[{"gpio":21,"connected":true,"label":"SDA"}]}').pins[0].gpio,21);
 for(const pins of [[{gpio:20,connected:true,label:'bad'}],[{gpio:21,connected:'yes',label:'bad'}],[{gpio:21,connected:true,label:'a'},{gpio:21,connected:true,label:'b'}]])assert.throws(()=>p.parse(JSON.stringify({type:'pins',board:'esp32-classic',pins})));

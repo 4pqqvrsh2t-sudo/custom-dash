@@ -22,7 +22,11 @@
     $('#voice-select').value = voices.some(v => v.voiceURI === options.voiceURI) ? options.voiceURI : '';
   }
   function speak(message) {
-    if (!options.voice || !synth || document.hidden) return;
+    if (!options.voice || document.hidden) return;
+    const key={'Starting route.':'voice-start','Starting route. Navigation systems online.':'voice-start','Resuming route.':'voice-resume','Route paused.':'voice-pause','Destination reached. Route complete.':'voice-arrive','Voice interface online.':'voice-online'}[message];
+    for(const id of ['voice-start','voice-resume','voice-pause','voice-arrive','voice-online'])window.CustomSounds?.stop(id);
+    if(key&&window.CustomSounds?.play(key)){synth?.cancel();return;}
+    if(!synth)return;
     synth.cancel(); // Latest event wins; never build a stale navigation queue.
     const utterance = new SpeechSynthesisUtterance(message);
     const selected = voices.find(v => v.voiceURI === options.voiceURI) || voices.find(v => /^en/i.test(v.lang) && /Daniel|David|Alex|George|James|Oliver/i.test(v.name)) || voices.find(v => /^en/i.test(v.lang));
@@ -36,6 +40,7 @@
   }
   function cue(type = 'tap') {
     if (!prefs.sounds || document.hidden) return;
+    if(window.CustomSounds?.play('ui-'+type))return;
     try {
       const c = audioContext(); c.resume().catch(() => {});
       const notes = type === 'engage' ? [82,123,164] : type === 'lock' ? [196,98] : type === 'zoom' ? [110,146] : type === 'port' ? [73,110,147] : [130,65];
