@@ -1,13 +1,13 @@
 'use strict';
 const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const protocol=require('../port-protocol.js');
+const protocol=require('../port-protocol.js');const {SensorAlertMonitor}=require('../alerts.js');
 function node(){return {textContent:'',disabled:false,value:'115200',children:[],append(...items){this.children.push(...items)},replaceChildren(){this.children=[]}};}
 async function run(){
   const nodes=new Map(),$=key=>{if(!nodes.has(key))nodes.set(key,node());return nodes.get(key)};
-  let now=10000,refresh,deliver,closed=0,released=0;
+  let now=10000,refresh,deliver,closed=0,released=0;const alerts=[],monitor=new SensorAlertMonitor(e=>alerts.push(e));
   const reader={read:()=>new Promise(resolve=>deliver=resolve),cancel:async()=>deliver({done:true}),releaseLock:()=>released++};
   const port={readable:{getReader:()=>reader},open:async settings=>assert.equal(settings.baudRate,115200),close:async()=>closed++,getInfo:()=>({usbVendorId:0x303a,usbProductId:0x1001})};
-  const context={$ ,SurfaceProtocol:protocol,navigator:{serial:{requestPort:async()=>port}},window:{isSecureContext:true},document:{createElement:node},TextDecoder,Date:{now:()=>now},setInterval:fn=>refresh=fn};
+  const context={$ ,SurfaceProtocol:protocol,navigator:{serial:{requestPort:async()=>port}},window:{isSecureContext:true,SurfaceAlerts:monitor},document:{createElement:node},TextDecoder,Date:{now:()=>now},setInterval:fn=>refresh=fn};
   vm.runInNewContext(fs.readFileSync(require.resolve('../ports.js'),'utf8'),context);
   assert.equal($('#port-state').textContent,'NOT OPEN');
   await $('#connect-port').onclick();assert.equal($('#port-state').textContent,'OPEN / WAITING');
@@ -19,7 +19,7 @@ async function run(){
   assert.equal($('#sensor-count').textContent,1);assert.equal($('#port-packets').textContent,2);
   await send('x'.repeat(5000)+'\nnope\n');assert.equal($('#port-errors').textContent,2);
   now+=6000;refresh();assert.equal($('#port-state').textContent,'STALE / NO DATA');
-  assert.equal($('#sensor-readings').children[0].children[2].textContent,'STALE');
+  assert.equal($('#sensor-readings').children[0].children[2].textContent,'STALE');assert(alerts.some(e=>e.id==='serial'));assert(alerts.some(e=>e.id==='sensor:temp'));const count=alerts.length;refresh();assert.equal(alerts.length,count);
   await $('#disconnect-port').onclick();assert.equal($('#port-state').textContent,'NOT OPEN');assert.equal(closed,1);assert.equal(released,1);
   $('#packet-test').value='{"type":"power","usb_present":true}';$('#validate-packet').onclick();assert($('#packet-result').textContent.startsWith('VALID'));assert.equal($('#port-state').textContent,'NOT OPEN');
   console.log('PASS: serial open/read/identity, sensor rendering, oversized line recovery, stale timers, disconnect cleanup, isolated validation');
