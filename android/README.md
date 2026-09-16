@@ -10,4 +10,17 @@ ENABLE RETURN BUTTON adds a notification with RETURN TO COCKPIT. Android 13+ ask
 
 This shell now passes trusted GitHub Pages camera and geolocation requests through Android runtime permissions. GPS speed still depends on the head unit having a usable location provider; cargo camera support depends on its camera/WebView implementation. It does not yet supply native USB/serial, background audio, file upload or guaranteed speech synthesis. The Web Serial Port client may be unavailable in Android WebView. ESP32/OBD access still needs a native USB bridge or compatible network bridge; neither is implemented in this shell. Do not treat this as finished vehicle integration.
 
+## Mapbox build configuration
+
+The Android project uses Mapbox Navigation Core 3.30.1 and opens a native live-map surface from the Navigation panel. The public token is injected as the `mapbox_access_token` Android resource at build time. The secret downloads token is used only to authenticate Gradle to Mapbox's Maven repository; neither token belongs in source control.
+
+Set these environment variables (or same-named Gradle properties) before building:
+
+```text
+MAPBOX_ACCESS_TOKEN=pk…
+MAPBOX_DOWNLOADS_TOKEN=sk…
+```
+
+GitHub Actions reads both from repository secrets and publishes a debug APK artifact. The native map is real, but native destination search, route guidance, map-matched posted limits and location-puck wiring are still marked unavailable until their callbacks are implemented and road-tested. The HTML route remains a labeled simulation.
+
 Before installation, obtain the head unit's actual Android API level and identify the original launcher. Verify home/return switching, display bounds, audio, standby/wake and rear-camera takeover while parked. Do not update MCU/Android firmware as part of this app installation.

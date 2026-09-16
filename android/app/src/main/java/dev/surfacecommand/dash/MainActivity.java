@@ -10,7 +10,7 @@ import android.view.*;
 import android.webkit.*;
 import android.widget.*;
 
-// Preview shell, not a replacement HOME launcher. No JavaScript/native bridge.
+// Preview shell, not a replacement HOME launcher. The narrow bridge only opens native app surfaces.
 public class MainActivity extends Activity {
     private WebView web;
     private PermissionRequest pendingCameraRequest;
@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
         web.getSettings().setJavaScriptEnabled(true);web.getSettings().setDomStorageEnabled(true);web.getSettings().setGeolocationEnabled(true);
         web.getSettings().setAllowFileAccess(false);web.getSettings().setAllowContentAccess(false);
         web.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        web.addJavascriptInterface(new DashboardBridge(),"SurfaceNative");
         web.setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){
                 Uri uri=request.getUrl();if(!request.isForMainFrame())return false;
@@ -49,6 +50,9 @@ public class MainActivity extends Activity {
         web.loadUrl(HOME);
         original.setOnClickListener(v->{try{startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}catch(ActivityNotFoundException e){Toast.makeText(this,"No system home app found.",Toast.LENGTH_LONG).show();}});
         back.setOnClickListener(v->{if(Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},NOTIFICATION_REQUEST);else returnButton();});
+    }
+    private final class DashboardBridge {
+        @JavascriptInterface public void openNavigation(){runOnUiThread(()->startActivity(new Intent(MainActivity.this,MapboxNavigationActivity.class)));}
     }
     private void returnButton(){
         NotificationManager manager=getSystemService(NotificationManager.class);

@@ -34,6 +34,14 @@ function installNavigationGroups(){
   for(const [sectionId,tabs] of Object.entries(groups)){const section=$('#'+sectionId);if(!section)continue;const bar=document.createElement('div');bar.className='subtabs';bar.setAttribute('aria-label',sectionId+' sections');for(const [view,label] of tabs){const button=document.createElement('button');button.dataset.view=view;button.textContent=label;bar.append(button)}section.querySelector('.section-heading').after(bar)}
 }
 installNavigationGroups();
+function installNativeMapControl(){
+  const panel=$('#navigation .nav-info');if(!panel)return;
+  const button=document.createElement('button');button.id='open-native-map';button.className='primary';button.textContent='OPEN LIVE MAP';
+  const status=document.createElement('p');status.id='native-map-status';status.className='tiny';status.textContent='MAPBOX NAVIGATION / ANDROID BUILD';
+  button.onclick=()=>{try{if(window.SurfaceNative&&typeof window.SurfaceNative.openNavigation==='function'){window.SurfaceNative.openNavigation();status.textContent='OPENING NATIVE MAPBOX MAP';return;}}catch{}status.textContent='NATIVE MAP REQUIRES THE ANDROID DASH APP';toast('Live Mapbox opens from the Android dashboard app.');};
+  panel.append(button,status);
+}
+installNativeMapControl();
 function showView(view){if(view==='media')view='radio';if(!['cockpit','navigation','data','radio','spotify','systems','port','proximity','cargo'].includes(view))view='cockpit';const parent={proximity:'navigation',spotify:'radio',port:'systems'}[view]||view;$$('.view').forEach(e=>e.classList.toggle('active',e.id===view));$$('nav button').forEach(b=>{if(b.dataset.view===parent)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});$$('.subtabs [data-view]').forEach(b=>{if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});history.replaceState(null,'','#'+view);$('#main').scrollTop=0;if(view==='data')renderData();}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>{clickSound();showView(b.dataset.view);}));window.addEventListener('hashchange',()=>showView(location.hash.slice(1)));
 function updatePlay(){
