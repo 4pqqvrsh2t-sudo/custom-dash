@@ -2,7 +2,7 @@
 const SoundSlots={
  'ui-tap':'Button / tab tap','ui-zoom':'Scanner / map zoom','ui-port':'Port control','ui-engage':'Route engage tone','ui-lock':'Radio lock / confirmation',
  'radar-arrival':'Target arrival','radar-departure':'Target departure','sensor-info':'Input lost / informational','sensor-warning':'Input lost / warning','sensor-critical':'Input lost / critical',
- 'boot-hum':'Startup hum (loop)','boot-module':'Startup module check','boot-ready':'Startup complete','idle-hum':'Idle electrical bed (loop)','radio-scan':'Radio scanning (loop)',
+ 'boot-hum':'Startup hum (loop)','boot-module':'Startup module check','boot-ready':'Startup complete','idle-hum':'Idle electrical bed (loop)','radio-scan':'Radio scanning (loop)','commission-rumble':'Commissioning power rumble','commission-vent':'Commissioning pressure vent','commission-pass':'Commissioning complete',
  'voice-start':'Starting route.','voice-resume':'Resuming route.','voice-pause':'Route paused.','voice-arrive':'Destination reached. Route complete.','voice-online':'Voice interface online.'
 };
 if(typeof module!=='undefined')module.exports={SoundSlots};

@@ -21,16 +21,19 @@ WAV or MP3 recommended. Suggested durations below are creative targets, not requ
 | boot-ready.wav | Final startup module completes | 0.6–1.2 s |
 | idle-hum.wav | Electrical background when music is inactive | 5–15 s, seamless |
 | radio-scan.wav | Radio tuning scan loop | 1–3 s, seamless |
+| commission-rumble.wav | Commissioning power-bus charge and low mechanical bed | 4–12 s, seamless |
+| commission-vent.wav | Pressure purge / steam discharge | 0.6–1.5 s |
+| commission-pass.wav | Final integrity confirmation | 0.5–1.2 s |
 | voice-start.wav | “Starting route.” | Natural spoken length |
 | voice-resume.wav | “Resuming route.” | Natural spoken length |
 | voice-pause.wav | “Route paused.” | Natural spoken length |
 | voice-arrive.wav | “Destination reached. Route complete.” | Natural spoken length |
 | voice-online.wav | “Voice interface online.” | Natural spoken length |
 
-There are **15 effects/loops plus 5 optional voice clips**. Radar sounds retain grouping, cooldown and repeated-target muting. Interface and voice preferences still apply; test previews deliberately play the selected file. Audio needs a user gesture to unlock. The idle loop plays quietly and stops while music is active. Sensor tones report data loss, not a diagnosis of mechanical failure. Backup Radio music remains a separate upload feature.
+There are **18 effects/loops plus 5 optional voice clips**. Radar sounds retain grouping, cooldown and repeated-target muting. Interface and voice preferences still apply; test previews deliberately play the selected file. Audio needs a user gesture to unlock. The idle loop plays quietly and stops while music is active. Sensor tones report data loss, not a diagnosis of mechanical failure. Backup Radio music remains a separate upload feature.
 
 # Display stress test
 
-Systems → Run System Stress Test / Parked starts a labeled simulation. It shows five of each target symbol, then a 200-target load. It sweeps the real speed display from 0 to 150 MPH and back, RPM from 0 to 7,500 and back, and changes the speed-limit display through 15–70 MPH. These are synthetic display ranges, not the truck's top speed or redline. Chart samples remain separate from recorded driving data. The speed dial spans 0–160 MPH to display the full test range. A compact status strip retains Stop throughout the test.
+Systems → Run Commissioning Sequence / Parked opens a full-screen pre-flight sequence. It charges the power bus, purges the pressure manifold, aligns every scanner renderer, fills the perception scope with 25 moving tracks, sweeps speed and RPM instruments, checks navigation, enumerates the ESP32 interface, verifies camera and audio routes, and finishes with an integrity pass. These are synthetic display loads, not vehicle measurements. Chart samples remain separate from recorded driving data. The speed dial spans 0–160 MPH to display the full test range. Abort remains available throughout the sequence.
 
 Cancel, completion, page hiding or received vehicle motion restores real telemetry, the original speed-limit display and prior pin-preview state. This is a visual/audio software test, not a hardware qualification test.

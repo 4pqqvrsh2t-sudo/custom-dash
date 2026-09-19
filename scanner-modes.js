@@ -34,20 +34,52 @@ const bar=document.createElement('div');bar.className='scanner-mode-controls';ba
   ];}
   function activeContacts(kind){const source=testContacts||(preview?simulatedContacts():liveContacts);if(!(kind==='vehicle'||kind==='proximity'||kind==='road'&&vehicles))return [];return source.filter(c=>c.distanceMeters<=rangeMeters&&(kind==='proximity'||/CAR|TRUCK|VEHICLE|MOTORCYCLE|BUS/.test(c.type)));}
   function position(contact){const angle=contact.bearingDegrees*Math.PI/180,ratio=clamp(contact.distanceMeters/rangeMeters,0,1);return [180+Math.sin(angle)*158*ratio,110-Math.cos(angle)*81*ratio];}
+  function defs(parent){
+    const d=element('defs',{},parent),glow=element('filter',{id:'sensor-glow',x:'-80%',y:'-80%',width:'260%',height:'260%'},d);element('feGaussianBlur',{stdDeviation:'2.4',result:'blur'},glow);const merge=element('feMerge',{},glow);element('feMergeNode',{in:'blur'},merge);element('feMergeNode',{in:'SourceGraphic'},merge);
+    const amber=element('linearGradient',{id:'scanner-amber',x1:'0',x2:'1'},d);element('stop',{offset:'0','stop-color':'#ff7b22','stop-opacity':'.05'},amber);element('stop',{offset:'.5','stop-color':'#ffd08a','stop-opacity':'.85'},amber);element('stop',{offset:'1','stop-color':'#ff7b22','stop-opacity':'.05'},amber);
+    const cyan=element('radialGradient',{id:'scanner-cyan'},d);element('stop',{offset:'0','stop-color':'#c6fbff','stop-opacity':'.4'},cyan);element('stop',{offset:'1','stop-color':'#49b9cc','stop-opacity':'0'},cyan);
+    const clip=element('clipPath',{id:'scope-mask'},d);element('path',{d:'M20 34L42 14H318L340 34V186L318 206H42L20 186Z'},clip);
+  }
+  function frame(parent,kind){
+    element('path',{d:'M20 34L42 14H318L340 34V186L318 206H42L20 186Z',class:'scope-shell'},parent);
+    element('path',{d:'M34 43L50 27H310L326 43 M34 177L50 193H310L326 177',class:'scope-inner'},parent);
+    const label=element('text',{x:34,y:24,class:'scope-mode-label'},parent);label.textContent='SENSOR ARRAY // '+kind.toUpperCase();
+    const rangeLabel=element('text',{x:326,y:198,'text-anchor':'end',class:'scope-range-label'},parent);rangeLabel.textContent=rangeMeters+' M FIELD';
+    for(let i=0;i<26;i++)element('line',{x1:42+i*11,y1:204,x2:47+i*11,y2:204,class:i%5?'scope-tick':'scope-tick major'},parent);
+  }
+  function backgroundGrid(parent){
+    const grid=element('g',{class:'holo-grid','clip-path':'url(#scope-mask)'},parent);
+    for(let y=50;y<=190;y+=20)element('path',{d:`M${25+(y-40)*.18} ${y}H${335-(y-40)*.18}`},grid);
+    for(let x=48;x<=312;x+=33)element('path',{d:`M180 110L${x} 204`},grid);
+    return grid;
+  }
+  function mapLayer(parent,buildings){
+    const layer=element('g',{transform:`translate(180 110) scale(${200/rangeMeters}) translate(-180 -110)`,class:'map-geometry','clip-path':'url(#scope-mask)'},parent);
+    const roads=['M10 66C82 48 125 72 180 103S282 150 355 130','M75 5C90 67 134 90 208 104S302 126 365 202','M-5 166C75 142 118 152 174 128S274 66 365 78','M150 -5C145 60 162 100 190 142S238 190 248 225'];
+    roads.forEach((d,i)=>{element('path',{d,class:i===0?'map-road primary':'map-road'},layer);element('path',{d,class:'map-road-core'},layer);});
+    if(buildings){
+      for(const [x,y,w,h] of [[44,39,31,22],[87,76,24,18],[119,34,42,26],[208,39,34,25],[265,57,42,31],[62,122,37,29],[116,151,45,25],[236,143,33,24],[284,123,27,22]]){element('path',{d:`M${x} ${y+h}V${y+6}L${x+6} ${y}H${x+w}V${y+h}Z`,class:'map-building'},layer);element('path',{d:`M${x} ${y+h}H${x+w}`,class:'map-building-base'},layer);}
+      const target=element('g',{class:'map-destination',transform:'translate(270 92)'},layer);element('circle',{r:11},target);element('circle',{r:4},target);element('path',{d:'M-17 0H-8M8 0H17M0-17V-8M0 8V17'},target);
+    }
+  }
+  function roadLayer(parent){
+    const g=element('g',{class:'road-hologram','clip-path':'url(#scope-mask)'},parent);element('path',{d:'M26 64H334',class:'road-horizon'},g);element('path',{d:'M144 206L173 64M216 206L187 64',class:'road-edge'},g);element('path',{d:'M180 206V64',class:'road-center'},g);
+    for(let y=78;y<202;y+=24){const width=(y-64)*.09;element('path',{d:`M${180-width} ${y}H${180+width}`,class:'road-dash'},g);}
+    for(let y=83;y<202;y+=30)element('path',{d:`M${40+(y-64)*.45} ${y}H${320-(y-64)*.45}`,class:'road-depth'},g);
+    element('path',{d:'M174 191L180 178L186 191L180 187Z',class:'self-marker'},g);
+  }
+  function radarLayer(parent,kind){
+    const g=element('g',{class:'radar-hologram','clip-path':'url(#scope-mask)'},parent),bands=preview||testContacts?[{radiusMeters:200,confidence:.35},{radiusMeters:100,confidence:.65},{radiusMeters:40,confidence:.9}]:zones;
+    for(const band of [...bands].sort((a,b)=>b.radiusMeters-a.radiusMeters)){const r=158*Math.min(1,band.radiusMeters/rangeMeters);element('ellipse',{cx:180,cy:112,rx:r,ry:r*.5,fill:confidenceColor(band.confidence),'fill-opacity':.035+.1*band.confidence,stroke:confidenceColor(band.confidence),'stroke-opacity':.36,class:'confidence-zone'},g);}
+    for(const r of [38,79,120,158])element('ellipse',{cx:180,cy:112,rx:r,ry:r*.5,class:'radar-ring'},g);
+    for(const angle of [-60,-30,0,30,60]){const a=angle*Math.PI/180;element('path',{d:`M180 112L${180+Math.sin(a)*158} ${112-Math.cos(a)*79}`,class:'radar-spoke'},g);}
+    element('path',{d:'M180 112L292 56A158 79 0 0 1 325 84Z',class:'radar-sweep'},g);element('ellipse',{cx:180,cy:112,rx:158,ry:79,class:'acquisition-ring'},g);
+    if(kind==='vehicle')element('path',{d:'M180 96L190 119L180 114L170 119Z',class:'self-marker vehicle'},g);
+  }
   function draw(parent,kind,full=false){
     parent.replaceChildren();
-    if(kind==='map'||kind==='road'){
-      const layer=element('g',{transform:`translate(180 110) scale(${200/rangeMeters}) translate(-180 -110)`,class:'map-geometry'},parent);element('path',{d:'M35 80H325 M35 140H325 M115 25V195 M240 25V195',fill:'none',stroke:'#d07632','stroke-width':3},layer);
-      if(kind==='map')for(const [x,y,w,h] of [[45,30,55,35],[130,30,90,35],[260,30,50,35],[45,95,55,28],[130,95,90,28],[260,95,50,28],[45,156,55,30],[130,156,90,30]])element('rect',{x,y,width:w,height:h,fill:'#ae5d2524',stroke:'#ae6b37'},layer);
-    }else{
-      const bands=preview||testContacts?[{radiusMeters:200,confidence:.35},{radiusMeters:100,confidence:.65},{radiusMeters:40,confidence:.9}]:zones;
-      for(const band of [...bands].sort((a,b)=>b.radiusMeters-a.radiusMeters)){const r=158*Math.min(1,band.radiusMeters/rangeMeters);element('ellipse',{cx:180,cy:110,rx:r,ry:r*.52,fill:confidenceColor(band.confidence),'fill-opacity':.07+.14*band.confidence,stroke:confidenceColor(band.confidence),'stroke-opacity':.35,class:'confidence-zone'},parent);}
-      for(const r of [40,80,125,164])element('ellipse',{cx:180,cy:110,rx:r,ry:r*.52,fill:'none',stroke:'#945225','stroke-opacity':.55},parent);
-      element('path',{d:'M16 110H344 M180 25V195',stroke:'#57371e'},parent);
-      if(preview)element('path',{d:'M180 110L123 31A164 85 0 0 1 237 31Z',fill:'#78dce710',stroke:'#78dce733',class:'sensor-fov wide'},parent);
-      if(preview)element('path',{d:'M180 110L165 26A164 85 0 0 1 195 26Z',fill:'#ffab540e',stroke:'#ffab5438',class:'sensor-fov narrow'},parent);
-      element('ellipse',{cx:180,cy:110,rx:164,ry:85,fill:'none',stroke:'#ffc98e',class:'acquisition-ring'},parent);
-    }
+    defs(parent);frame(parent,kind);backgroundGrid(parent);
+    if(kind==='map')mapLayer(parent,true);else if(kind==='road')roadLayer(parent);else radarLayer(parent,kind);
     for(const contact of activeContacts(kind)){
       const [x,y]=position(contact),color=confidenceColor(contact.confidence);
       const car=/CAR|TRUCK|VEHICLE|MOTORCYCLE|BUS/.test(contact.type),human=/PERSON|HUMAN|PEDESTRIAN/.test(contact.type),animal=/ANIMAL|DOG|CAT|DEER/.test(contact.type);
@@ -62,7 +94,7 @@ const bar=document.createElement('div');bar.className='scanner-mode-controls';ba
       mark.onclick=select;mark.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}};
       if(full){const t=element('text',{x:x+9,y:y+3,fill:color,'font-size':7},parent);t.textContent=contact.type;}
     }
-    if(full)element('path',{d:'M180 99L188 118L180 114L172 118Z',fill:'#93efff'},parent);
+    if(full&&kind!=='road')element('path',{d:'M180 100L188 119L180 115L172 119Z',class:'self-marker'},parent);
   }
   function range(){q('#scanner-range').textContent=rangeMeters+' M';q('#proximity-range').textContent=rangeMeters+' M DISPLAY';q('#scanner-in').disabled=rangeMeters<=MIN_RANGE;q('#scanner-out').disabled=rangeMeters>=MAX_RANGE;q('#scanner-svg').setAttribute('aria-label',`${mode} view, ${rangeMeters} meter display range, ${preview?'simulated contacts':liveContacts.length?'live contacts':'no sensor data'}`);}
   function renderContacts(){
