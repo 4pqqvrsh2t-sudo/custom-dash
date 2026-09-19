@@ -7,7 +7,7 @@ try{const saved=JSON.parse(localStorage.getItem('frontier-prefs')||'{}');for(con
 for(const key of ['glow','sounds'])$('#'+key).checked=prefs[key];$('#intensity').value=prefs.intensity;$('#volume').value=prefs.volume;
 function applyPrefs(){document.body.classList.toggle('no-glow',!prefs.glow);document.documentElement.style.setProperty('--intensity',prefs.intensity/100);try{localStorage.setItem('frontier-prefs',JSON.stringify(prefs))}catch{}}
 applyPrefs();
-function audioContext(){if(!ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('Audio unavailable');ctx=new Audio();}return ctx;}
+function audioContext(){try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch{}if(!ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('Audio unavailable');ctx=new Audio();}return ctx;}
 function stopIdleBed(){window.CustomSounds?.stop('idle-hum');idleNodes.forEach(n=>{try{n.stop?.();n.disconnect()}catch{}});idleNodes=[];if(idleGain){try{idleGain.disconnect()}catch{}idleGain=null;}}
 function musicChannelActive(){return playing||playPending||scanning||source==='spotify';}
 function syncIdleBed(){
@@ -42,7 +42,7 @@ function installNativeMapControl(){
   panel.append(button,status);
 }
 installNativeMapControl();
-function showView(view){if(view==='media')view='radio';if(!['cockpit','navigation','data','radio','spotify','systems','port','proximity','cargo'].includes(view))view='cockpit';const parent={proximity:'navigation',spotify:'radio',port:'systems'}[view]||view;$$('.view').forEach(e=>e.classList.toggle('active',e.id===view));$$('nav button').forEach(b=>{if(b.dataset.view===parent)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});$$('.subtabs [data-view]').forEach(b=>{if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});history.replaceState(null,'','#'+view);$('#main').scrollTop=0;if(view==='data')renderData();}
+function showView(view){if(view==='media')view='radio';if(!['cockpit','navigation','data','radio','spotify','systems','port','proximity','parking','cargo'].includes(view))view='cockpit';const parent={proximity:'navigation',parking:'navigation',spotify:'radio',port:'systems'}[view]||view;$$('.view').forEach(e=>e.classList.toggle('active',e.id===view));$$('nav button').forEach(b=>{if(b.dataset.view===parent)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});$$('.subtabs [data-view]').forEach(b=>{if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});history.replaceState(null,'','#'+view);window.dispatchEvent(new CustomEvent('surface-view',{detail:{view}}));$('#main').scrollTop=0;if(view==='data')renderData();}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>{clickSound();showView(b.dataset.view);}));window.addEventListener('hashchange',()=>showView(location.hash.slice(1)));
 function updatePlay(){
   $$('.play').forEach(b=>{const external=source==='spotify'&&!b.closest('#radio');b.textContent=external?'↗':scanning?'■':playing?'Ⅱ':'▶';b.setAttribute('aria-label',external?'Open Spotify player':scanning?'Cancel station scan':playing?'Pause audio':'Play audio');b.setAttribute('aria-pressed',String(!external&&playing));b.disabled=playPending;});

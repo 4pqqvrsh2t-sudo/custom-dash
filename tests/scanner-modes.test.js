@@ -4,7 +4,7 @@ test('scanner modes keep measured detections opt-in and use five metre display s
   function node(){return {dataset:{},children:[],style:{setProperty(){}},classList:{contains:()=>true},checked:true,attrs:{},append(e){this.children.push(e)},after(){},remove(){this.removed=true},insertBefore(){},setAttribute(k,v){this.attrs[k]=v},replaceChildren(){this.children=[]}};}
   const q=s=>{if(!nodes.has(s))nodes.set(s,node());return nodes.get(s)};
   vm.runInNewContext(fs.readFileSync('scanner-modes.js','utf8'),{document:{querySelector:q,createElement:node,createElementNS:node},location:{hash:''},showView(){},setInterval(){},matchMedia:()=>({matches:false})});
-  const world=q('#scanner-world');assert.equal(world.children.filter(e=>e.attrs.class==='contact-lock').length,0);q('#scan-mode').onchange({target:{value:'map'}});assert.equal(world.children.filter(e=>e.attrs.width).length,8);
+  const world=q('#scanner-world');assert.equal(world.children.filter(e=>e.attrs.class==='contact-lock').length,0);q('#scan-mode').onchange({target:{value:'map'}});assert.equal(world.children[0].children.filter(e=>e.attrs.width).length,8);
   q('#scan-mode').onchange({target:{value:'vehicle'}});assert.equal(world.children.filter(e=>e.attrs.class==='contact-lock').length,0);
   q('#perception-preview').onchange({target:{checked:true}});assert.equal(world.children.filter(e=>e.attrs.class==='contact-lock').length,1);
   q('#scan-mode').onchange({target:{value:'proximity'}});assert.equal(world.children.filter(e=>e.attrs.class==='contact-lock').length,4);
