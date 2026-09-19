@@ -39,6 +39,7 @@
     q('#cargo-form').onsubmit=e=>{e.preventDefault();try{inventory.add({label:q('#cargo-label').value,category:q('#cargo-category').value,quantity:Number(q('#cargo-quantity').value),source:visionSuggested?'vision':captured?'camera':'verified'});q('#cargo-form').reset();q('#cargo-quantity').value=1;canvas.hidden=true;captured=false;visionSuggested=false;setStatus('VERIFIED ITEM ADDED / IMAGE DISCARDED');render()}catch(error){setStatus(error.message.toUpperCase(),'warning')}};
     q('#manual-cargo').onclick=()=>{captured=false;visionSuggested=false;canvas.hidden=true;q('#cargo-label').focus();setStatus('MANUAL ENTRY / VERIFY BEFORE ADDING')};
     globalThis.addEventListener('surface-telemetry',e=>{lastSpeed=Number.isFinite(e.detail?.speed)?e.detail.speed:null;if(lastSpeed>=.5&&stream)stopCamera('CAMERA STOPPED / VEHICLE MOVING')});
+    globalThis.addEventListener('surface-view',e=>{if(e.detail.view!=='cargo')stopCamera('CAMERA OFFLINE / VIEW CHANGED')});
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCamera('CAMERA OFFLINE / APP BACKGROUNDED')});
     globalThis.SurfaceCargo={setAnalyzer(fn){if(typeof fn!=='function')throw Error('Analyzer must be a function.');analyzer=fn;q('#vision-state').textContent='VISION PROVIDER CONNECTED';},clearAnalyzer(){analyzer=null;q('#vision-state').textContent='VISION PROVIDER NOT CONNECTED';},categories:[...CATEGORIES]};render();
   }
