@@ -5,8 +5,10 @@ const EdgeTabs=require('../gestures.js');
 
 test('tab order advances and wraps',()=>{
   assert.equal(EdgeTabs.adjacent('cockpit','next'),'navigation');
-  assert.equal(EdgeTabs.adjacent('spotify','next'),'cargo');
+  assert.equal(EdgeTabs.adjacent('spotify','next'),'cockpit');
   assert.equal(EdgeTabs.adjacent('systems','next'),'cockpit');
+  assert.equal(EdgeTabs.adjacent('parking','next'),'cargo');
+  assert.equal(EdgeTabs.adjacent('navigation','next'),'proximity');
   assert.equal(EdgeTabs.adjacent('cockpit','previous'),'systems');
 });
 

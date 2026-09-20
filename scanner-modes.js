@@ -13,7 +13,7 @@
   const reset=q('#scanner-reset'); if(reset&&reset.remove)reset.remove();
   q('#scanner-out').textContent='+ 5 M'; q('#scanner-in').textContent='− 5 M';
   const section=document.createElement('section');section.id='proximity';section.className='view';section.setAttribute('aria-label','Proximity');
-  section.innerHTML='<div class="section-heading"><div><small>PERCEPTION / SENSOR FUSION</small><h1>PROXIMITY</h1></div><span class="cyan" id="perception-state">NO SENSOR DATA</span></div><div class="proximity-layout"><article class="panel"><div class="panel-title">LOCAL CONTACT FIELD <span id="proximity-range">200 M DISPLAY</span></div><svg id="proximity-scope" viewBox="0 0 360 220" role="img" aria-label="Proximity sensor view, no data"></svg><p id="proximity-message" role="status">No sensor source connected. An empty display does not mean the area is clear.</p><label class="setting">Preview simulated contacts<input id="perception-preview" type="checkbox"></label></article><article class="panel"><div class="panel-title">CONTACT CLASSIFICATION</div><div id="contact-list"></div><p id="contact-detail" role="status">Select a target for confidence.</p><div class="panel-title">SENSOR SOURCES</div><div class="sensor-source-list"><p><b>WIDE ULTRASONIC</b><span>SHORT RANGE / NOT CONNECTED</span></p><p><b>NARROW ULTRASONIC</b><span>SHORT RANGE / NOT CONNECTED</span></p><p><b>CAMERA</b><span>CLASSIFICATION / NOT CONNECTED</span></p><p><b>RADAR · LIDAR · TOF</b><span>OPTIONAL RANGE / NOT CONNECTED</span></p></div><p>Centered bands show sensor-reported confidence by range. Unreported bands stay unshaded. ▲ human · ■ animal · dotted circle miscellaneous · arrow vehicle heading / rectangle when unknown. Display range is not sensor range. Only measured contacts supplied by connected hardware are plotted.</p><p class="tiny">Prototype only—not collision avoidance. Camera classification requires an on-device detector plus calibrated distance data.</p></article></div>';
+  section.innerHTML='<div class="section-heading"><div><small>PERCEPTION / SENSOR FUSION</small><h1>PROXIMITY</h1></div><span class="cyan" id="perception-state">NO SENSOR DATA</span></div><div class="proximity-layout"><article class="panel"><div class="panel-title">LOCAL CONTACT FIELD <span id="proximity-range">200 M DISPLAY</span></div><svg id="proximity-scope" viewBox="0 0 360 360" role="img" aria-label="Proximity sensor view, no data"></svg><p id="proximity-message" role="status">No sensor source connected. An empty display does not mean the area is clear.</p><label class="setting">Preview simulated contacts<input id="perception-preview" type="checkbox"></label></article><article class="panel"><div class="panel-title">CONTACT CLASSIFICATION</div><div id="contact-list"></div><p id="contact-detail" role="status">Select a target for confidence.</p><div class="panel-title">SENSOR SOURCES</div><div class="sensor-source-list"><p><b>WIDE ULTRASONIC</b><span>SHORT RANGE / NOT CONNECTED</span></p><p><b>NARROW ULTRASONIC</b><span>SHORT RANGE / NOT CONNECTED</span></p><p><b>CAMERA</b><span>CLASSIFICATION / NOT CONNECTED</span></p><p><b>RADAR · LIDAR · TOF</b><span>OPTIONAL RANGE / NOT CONNECTED</span></p></div><p>Centered bands show sensor-reported confidence by range. Unreported bands stay unshaded. ▲ human · ■ animal · dotted circle miscellaneous · arrow vehicle heading / rectangle when unknown. Display range is not sensor range. Only measured contacts supplied by connected hardware are plotted.</p><p class="tiny">Prototype only—not collision avoidance. Camera classification requires an on-device detector plus calibrated distance data.</p></article></div>';
   q('main').append(section);
 const bar=document.createElement('div');bar.className='scanner-mode-controls';bar.innerHTML='<select id="expanded-mode" aria-label="Expanded scanner mode"><option value="proximity">PROXIMITY</option><option value="map">MAP</option><option value="vehicle">VEHICLE</option><option value="road">ROAD</option></select><button id="expanded-in">− 5 M</button><button id="expanded-out">+ 5 M</button><label id="expanded-road" hidden><input id="expanded-vehicles" type="checkbox"> VEHICLES</label>';q('#proximity-scope').before?.(bar);
   function element(tag,attrs,parent){const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);parent.append(e);return e;}
@@ -33,26 +33,13 @@ const bar=document.createElement('div');bar.className='scanner-mode-controls';ba
     {id:'sim-unknown',type:'UNKNOWN',distanceMeters:108,bearingDegrees:55,confidence:.39,sensor:'SIM'}
   ];}
   function activeContacts(kind){const source=testContacts||(preview?simulatedContacts():liveContacts);if(!(kind==='vehicle'||kind==='proximity'||kind==='road'&&vehicles))return [];return source.filter(c=>c.distanceMeters<=rangeMeters&&(kind==='proximity'||/CAR|TRUCK|VEHICLE|MOTORCYCLE|BUS/.test(c.type)));}
-  function position(contact){const angle=contact.bearingDegrees*Math.PI/180,ratio=clamp(contact.distanceMeters/rangeMeters,0,1);return [180+Math.sin(angle)*158*ratio,110-Math.cos(angle)*81*ratio];}
-  function defs(parent){
-    const d=element('defs',{},parent),glow=element('filter',{id:'sensor-glow',x:'-80%',y:'-80%',width:'260%',height:'260%'},d);element('feGaussianBlur',{stdDeviation:'2.4',result:'blur'},glow);const merge=element('feMerge',{},glow);element('feMergeNode',{in:'blur'},merge);element('feMergeNode',{in:'SourceGraphic'},merge);
-    const amber=element('linearGradient',{id:'scanner-amber',x1:'0',x2:'1'},d);element('stop',{offset:'0','stop-color':'#ff7b22','stop-opacity':'.05'},amber);element('stop',{offset:'.5','stop-color':'#ffd08a','stop-opacity':'.85'},amber);element('stop',{offset:'1','stop-color':'#ff7b22','stop-opacity':'.05'},amber);
-    const cyan=element('radialGradient',{id:'scanner-cyan'},d);element('stop',{offset:'0','stop-color':'#c6fbff','stop-opacity':'.4'},cyan);element('stop',{offset:'1','stop-color':'#49b9cc','stop-opacity':'0'},cyan);
-    const clip=element('clipPath',{id:'scope-mask'},d);element('path',{d:'M20 34L42 14H318L340 34V186L318 206H42L20 186Z'},clip);
-  }
+  function position(contact){const angle=contact.bearingDegrees*Math.PI/180,ratio=clamp(contact.distanceMeters/rangeMeters,0,1);return [180+Math.sin(angle)*146*ratio,180-Math.cos(angle)*146*ratio];}
+  function defs(parent){const d=element('defs',{},parent),clip=element('clipPath',{id:'scope-mask'},d);element('rect',{x:20,y:20,width:320,height:320,rx:8},clip);}
   function frame(parent,kind){
-    element('path',{d:'M20 34L42 14H318L340 34V186L318 206H42L20 186Z',class:'scope-shell'},parent);
-    element('path',{d:'M34 43L50 27H310L326 43 M34 177L50 193H310L326 177',class:'scope-inner'},parent);
-    const label=element('text',{x:34,y:24,class:'scope-mode-label'},parent);label.textContent='SENSOR VIEW / '+kind.toUpperCase();
-    const rangeLabel=element('text',{x:326,y:198,'text-anchor':'end',class:'scope-range-label'},parent);rangeLabel.textContent=rangeMeters+' M FIELD';
-    for(let i=0;i<26;i++)element('line',{x1:42+i*11,y1:204,x2:47+i*11,y2:204,class:i%5?'scope-tick':'scope-tick major'},parent);
+    element('rect',{x:10,y:10,width:340,height:340,rx:10,class:'scope-shell'},parent);
+    for(const [text,x,y] of [['FRONT',180,27],['REAR',180,343],['L',23,183],['R',337,183]]){const t=element('text',{x,y,class:'bearing-label'},parent);t.textContent=text;}
   }
-  function backgroundGrid(parent){
-    const grid=element('g',{class:'holo-grid','clip-path':'url(#scope-mask)'},parent);
-    for(let y=50;y<=190;y+=20)element('path',{d:`M${25+(y-40)*.18} ${y}H${335-(y-40)*.18}`},grid);
-    for(let x=48;x<=312;x+=33)element('path',{d:`M180 110L${x} 204`},grid);
-    return grid;
-  }
+  function backgroundGrid(parent){const g=element('g',{class:'holo-grid'},parent);return g;}
   function mapLayer(parent,buildings){
     const layer=element('g',{transform:`translate(180 110) scale(${200/rangeMeters}) translate(-180 -110)`,class:'map-geometry','clip-path':'url(#scope-mask)'},parent);
     const roads=['M10 66C82 48 125 72 180 103S282 150 355 130','M75 5C90 67 134 90 208 104S302 126 365 202','M-5 166C75 142 118 152 174 128S274 66 365 78','M150 -5C145 60 162 100 190 142S238 190 248 225'];
@@ -63,23 +50,22 @@ const bar=document.createElement('div');bar.className='scanner-mode-controls';ba
     }
   }
   function roadLayer(parent){
-    const g=element('g',{class:'road-hologram','clip-path':'url(#scope-mask)'},parent);element('path',{d:'M26 64H334',class:'road-horizon'},g);element('path',{d:'M144 206L173 64M216 206L187 64',class:'road-edge'},g);element('path',{d:'M180 206V64',class:'road-center'},g);
-    for(let y=78;y<202;y+=24){const width=(y-64)*.09;element('path',{d:`M${180-width} ${y}H${180+width}`,class:'road-dash'},g);}
-    for(let y=83;y<202;y+=30)element('path',{d:`M${40+(y-64)*.45} ${y}H${320-(y-64)*.45}`,class:'road-depth'},g);
-    element('path',{d:'M174 191L180 178L186 191L180 187Z',class:'self-marker'},g);
+    const g=element('g',{class:'road-plan'},parent);
+    // Orientation guide, not measured lanes or a camera reconstruction.
+    element('path',{d:'M135 40V320M225 40V320',class:'road-edge'},g);
+    element('path',{d:'M180 40V320',class:'road-center'},g);
+    for(const y of [80,130,230,280])element('path',{d:`M60 ${y}H300`,class:'road-depth'},g);
   }
   function radarLayer(parent,kind){
-    const g=element('g',{class:'radar-hologram','clip-path':'url(#scope-mask)'},parent),bands=preview||testContacts?[{radiusMeters:200,confidence:.35},{radiusMeters:100,confidence:.65},{radiusMeters:40,confidence:.9}]:zones;
-    for(const band of [...bands].sort((a,b)=>b.radiusMeters-a.radiusMeters)){const r=158*Math.min(1,band.radiusMeters/rangeMeters);element('ellipse',{cx:180,cy:112,rx:r,ry:r*.5,fill:confidenceColor(band.confidence),'fill-opacity':.035+.1*band.confidence,stroke:confidenceColor(band.confidence),'stroke-opacity':.36,class:'confidence-zone'},g);}
-    for(const r of [38,79,120,158])element('ellipse',{cx:180,cy:112,rx:r,ry:r*.5,class:'radar-ring'},g);
-    for(const angle of [-60,-30,0,30,60]){const a=angle*Math.PI/180;element('path',{d:`M180 112L${180+Math.sin(a)*158} ${112-Math.cos(a)*79}`,class:'radar-spoke'},g);}
-    element('path',{d:'M180 112L292 56A158 79 0 0 1 325 84Z',class:'radar-sweep'},g);element('ellipse',{cx:180,cy:112,rx:158,ry:79,class:'acquisition-ring'},g);
-    if(kind==='vehicle')element('path',{d:'M180 96L190 119L180 114L170 119Z',class:'self-marker vehicle'},g);
+    const g=element('g',{class:'radar-plan'},parent),bands=preview||testContacts?[{radiusMeters:200,confidence:.35},{radiusMeters:100,confidence:.65},{radiusMeters:40,confidence:.9}]:zones;
+    for(const band of [...bands].sort((a,b)=>b.radiusMeters-a.radiusMeters)){const r=146*Math.min(1,band.radiusMeters/rangeMeters);element('ellipse',{cx:180,cy:180,rx:r,ry:r,fill:confidenceColor(band.confidence),'fill-opacity':.04+.10*band.confidence,stroke:confidenceColor(band.confidence),'stroke-opacity':.4,class:'confidence-zone'},g);}
+    for(const ratio of [.25,.5,.75,1]){const r=146*ratio;element('circle',{cx:180,cy:180,r,class:'radar-ring'},g);const t=element('text',{x:185,y:180-r+10,class:'scope-range-label'},g);t.textContent=(rangeMeters*ratio).toFixed(rangeMeters<20?1:0)+'m';}
+    for(const d of ['M34 180H326','M180 34V326'])element('path',{d,class:'radar-spoke'},g);
   }
   function draw(parent,kind,full=false){
     parent.replaceChildren();
     defs(parent);frame(parent,kind);backgroundGrid(parent);
-    if(kind==='map')mapLayer(parent,true);else if(kind==='road')roadLayer(parent);else radarLayer(parent,kind);
+    if(kind==='map'){if(preview||testContacts){const m=element('g',{transform:'translate(0 65)'},parent);mapLayer(m,true);}else{const t=element('text',{x:180,y:160,class:'scanner-placeholder'},parent);t.textContent='LIVE MAP IN NAVIGATE';const t2=element('text',{x:180,y:182,class:'scanner-placeholder'},parent);t2.textContent='ANDROID APP REQUIRED';}}else{radarLayer(parent,kind);if(kind==='road')roadLayer(parent);}
     for(const contact of activeContacts(kind)){
       const [x,y]=position(contact),color=confidenceColor(contact.confidence);
       const car=/CAR|TRUCK|VEHICLE|MOTORCYCLE|BUS/.test(contact.type),human=/PERSON|HUMAN|PEDESTRIAN/.test(contact.type),animal=/ANIMAL|DOG|CAT|DEER/.test(contact.type);
@@ -92,9 +78,9 @@ const bar=document.createElement('div');bar.className='scanner-mode-controls';ba
       else mark=element('circle',{...attrs,cx:x,cy:y,r:7,fill:'transparent','stroke-dasharray':'1 3'},parent);
       const select=()=>{selectedId=contact.id;q('#contact-detail').textContent=contact.type+' / CONFIDENCE '+(contact.confidence==null?'UNAVAILABLE':Math.round(contact.confidence*100)+'%')+' / '+contact.distanceMeters.toFixed(1)+' M';if(typeof toast==='function')toast(q('#contact-detail').textContent);};
       mark.onclick=select;mark.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}};
-      if(full){const t=element('text',{x:x+9,y:y+3,fill:color,'font-size':7},parent);t.textContent=contact.type;}
+      if(full&&false){const t=element('text',{x:x+9,y:y+3,fill:color,'font-size':7},parent);t.textContent=contact.type;}
     }
-    if(full&&kind!=='road')element('path',{d:'M180 100L188 119L180 115L172 119Z',class:'self-marker'},parent);
+    if(kind!=='map'){element('rect',{x:174,y:169,width:12,height:23,rx:3,class:'self-marker'},parent);element('path',{d:'M176 174H184',stroke:'#15291a','stroke-width':2},parent);}
   }
   function range(){q('#scanner-range').textContent=rangeMeters+' M';q('#proximity-range').textContent=rangeMeters+' M DISPLAY';q('#scanner-in').disabled=rangeMeters<=MIN_RANGE;q('#scanner-out').disabled=rangeMeters>=MAX_RANGE;q('#scanner-svg').setAttribute('aria-label',`${mode} view, ${rangeMeters} meter display range, ${preview?'simulated contacts':liveContacts.length?'live contacts':'no sensor data'}`);}
   function renderContacts(){
@@ -105,9 +91,9 @@ const bar=document.createElement('div');bar.className='scanner-mode-controls';ba
   }
   function render(){
     draw(q('#scanner-world'),mode);draw(q('#proximity-scope'),mode,true);range();renderContacts();q('#expanded-mode').value=mode;q('#scan-mode').value=mode;q('#expanded-road').hidden=mode!=='road';q('#expanded-vehicles').checked=vehicles;q('#expanded-in').disabled=rangeMeters<=5;q('#expanded-out').disabled=rangeMeters>=200;q('#road-overlay').hidden=mode!=='road';
-    const hasLive=receivedAt!==null;q('#scanner-source').textContent=testContacts?'SYSTEM TEST / SIMULATED':mode==='map'||mode==='road'?'SCHEMATIC MAP':preview?'SIMULATED CONTACTS':hasLive?'LIVE SENSOR INPUT':'NO SENSOR DATA';
-    q('.interactive-scanner .tiny').textContent=(mode==='map'||mode==='road')?'SCHEMATIC LAYER / NATIVE MAP OPENS ON ANDROID':preview?'SIMULATION / NOT OBSTACLE DETECTION':hasLive?'MEASURED SENSOR CONTACTS':'NO SENSOR DATA / NOT AN ALL-CLEAR';
-    q('#perception-state').textContent=testContacts?'SYSTEM TEST / SIMULATED':preview?'SIMULATION / NOT LIVE':hasLive?'LIVE INPUT':'NO SENSOR DATA';q('#proximity-message').textContent=(mode==='map'||mode==='road')?'SCHEMATIC ROAD LAYER / Not live navigation. Open native navigation for a real map.':testContacts?'SYSTEM TEST / Synthetic targets. Live measurements remain separate.':preview?'Simulated classifications and motion. Not camera detections.':hasLive?'Only measured contacts inside the selected display range are shown.':'No sensor source connected. An empty display does not mean the area is clear.';q('#proximity-scope').setAttribute('aria-label',preview?'Simulated proximity contacts':hasLive?`${liveContacts.length} received sensor contacts`:'Proximity sensor view, no data');
+    const hasLive=receivedAt!==null;q('#scanner-source').textContent=testContacts?'SYSTEM TEST / SIMULATED':mode==='map'?'NATIVE MAP':mode==='road'?'ORIENTATION GUIDE':preview?'SIMULATED CONTACTS':hasLive?'LIVE SENSOR INPUT':'NO SENSOR DATA';
+    q('.interactive-scanner .tiny').textContent=mode==='map'?'OPEN NAVIGATE FOR LIVE MAP':mode==='road'?'REFERENCE GRID / NOT DETECTED LANES':preview?'SIMULATION / NOT OBSTACLE DETECTION':hasLive?'MEASURED SENSOR CONTACTS':'NO SENSOR DATA / NOT AN ALL-CLEAR';
+    q('#perception-state').textContent=testContacts?'SYSTEM TEST / SIMULATED':preview?'SIMULATION / NOT LIVE':hasLive?'LIVE INPUT':'NO SENSOR DATA';q('#proximity-message').textContent=mode==='map'?'Live map is available through Navigate in the Android app. Preview geometry is simulated.':mode==='road'?'Truck-relative orientation guide; lines do not represent measured lane boundaries.':testContacts?'SYSTEM TEST / Synthetic targets. Live measurements remain separate.':preview?'Simulated classifications and motion. Not camera detections.':hasLive?'Only measured contacts inside the selected display range are shown.':'No sensor source connected. An empty display does not mean the area is clear.';q('#proximity-scope').setAttribute('aria-label',preview?'Simulated proximity contacts':hasLive?`${liveContacts.length} received sensor contacts`:'Proximity sensor view, no data');
   }
   q('#scan-mode').onchange=e=>{mode=e.target.value;rangeMeters=MAX_RANGE;render();};q('#scan-vehicles').onchange=e=>{vehicles=e.target.checked;render();};q('#perception-preview').onchange=e=>{preview=e.target.checked;render();};q('#scanner-in').onclick=()=>{rangeMeters=Math.max(MIN_RANGE,rangeMeters-RANGE_STEP);render();};q('#scanner-out').onclick=()=>{rangeMeters=Math.min(MAX_RANGE,rangeMeters+RANGE_STEP);render();};
   q('#expanded-vehicles').onchange=e=>{q('#scan-vehicles').checked=e.target.checked;q('#scan-vehicles').onchange(e);};q('#expanded-mode').onchange=e=>{q('#scan-mode').value=e.target.value;q('#scan-mode').onchange(e);};q('#expanded-in').onclick=()=>q('#scanner-in').onclick();q('#expanded-out').onclick=()=>q('#scanner-out').onclick();
