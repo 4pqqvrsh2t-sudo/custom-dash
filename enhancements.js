@@ -17,7 +17,7 @@
   function populateVoices() {
     if (!synth) { status.textContent = 'Speech is unavailable in this browser. Visual prompts remain enabled.'; $('#voice').disabled = true; $('#test-voice').disabled = true; return; }
     voices = synth.getVoices();
-    $('#voice-select').replaceChildren(new Option('Automatic ship computer', ''));
+    $('#voice-select').replaceChildren(new Option('Default device voice', ''));
     voices.forEach(v => $('#voice-select').add(new Option(v.name + ' / ' + v.lang, v.voiceURI)));
     $('#voice-select').value = voices.some(v => v.voiceURI === options.voiceURI) ? options.voiceURI : '';
   }

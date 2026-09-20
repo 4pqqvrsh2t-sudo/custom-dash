@@ -18,7 +18,7 @@
 const bar=document.createElement('div');bar.className='scanner-mode-controls';bar.innerHTML='<select id="expanded-mode" aria-label="Expanded scanner mode"><option value="proximity">PROXIMITY</option><option value="map">MAP</option><option value="vehicle">VEHICLE</option><option value="road">ROAD</option></select><button id="expanded-in">− 5 M</button><button id="expanded-out">+ 5 M</button><label id="expanded-road" hidden><input id="expanded-vehicles" type="checkbox"> VEHICLES</label>';q('#proximity-scope').before?.(bar);
   function element(tag,attrs,parent){const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);parent.append(e);return e;}
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-  function confidenceColor(confidence){if(!Number.isFinite(confidence))return 'hsl(28 35% 67%)';const c=clamp(confidence,0,1);return `hsl(${Math.round(18+c*20)} 86% ${Math.round(58+c*8)}%)`;}
+  function confidenceColor(confidence){if(!Number.isFinite(confidence))return 'hsl(35 12% 67%)';const c=clamp(confidence,0,1);return `hsl(${Math.round(35+c*105)} 30% ${Math.round(62+c*8)}%)`;}
   function normalizeContact(item,index){
     if(!item||typeof item!=='object')return null;
     const distance=item.distanceMeters,bearing=item.bearingDegrees,confidence=item.confidence==null?null:item.confidence;
@@ -43,7 +43,7 @@ const bar=document.createElement('div');bar.className='scanner-mode-controls';ba
   function frame(parent,kind){
     element('path',{d:'M20 34L42 14H318L340 34V186L318 206H42L20 186Z',class:'scope-shell'},parent);
     element('path',{d:'M34 43L50 27H310L326 43 M34 177L50 193H310L326 177',class:'scope-inner'},parent);
-    const label=element('text',{x:34,y:24,class:'scope-mode-label'},parent);label.textContent='SENSOR ARRAY // '+kind.toUpperCase();
+    const label=element('text',{x:34,y:24,class:'scope-mode-label'},parent);label.textContent='SENSOR VIEW / '+kind.toUpperCase();
     const rangeLabel=element('text',{x:326,y:198,'text-anchor':'end',class:'scope-range-label'},parent);rangeLabel.textContent=rangeMeters+' M FIELD';
     for(let i=0;i<26;i++)element('line',{x1:42+i*11,y1:204,x2:47+i*11,y2:204,class:i%5?'scope-tick':'scope-tick major'},parent);
   }

@@ -2,12 +2,12 @@
 (() => {
   const q=s=>document.querySelector(s),shell=q('.shell');
   const overlay=document.createElement('div');overlay.id='ship-startup';overlay.tabIndex=-1;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','System startup sequence');
-  overlay.innerHTML=`<div class="ignition-console"><div class="ignition-top"><span>SURFACE COMMAND / COLD START</span><strong>SYSTEM CHECK</strong></div><div class="ignition-reactor" aria-hidden="true"><svg viewBox="0 0 240 180"><g class="reactor-outer"><circle cx="120" cy="90" r="76"/><path d="M120 8V23 M120 157V172 M38 90H53 M187 90H202"/></g><g class="reactor-inner"><circle cx="120" cy="90" r="56"/><path d="M120 30L172 120H68Z"/></g><circle class="reactor-heart" cx="120" cy="90" r="25"/><path d="M0 90H35 M205 90H240"/></svg><div><small>IGNITION SEQUENCE</small><h1 id="boot-phase">CORE ENERGIZING</h1><p id="boot-sound-status">AUDIO / STARTING</p></div></div><div class="boot-energy" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div id="boot-modules"></div><progress id="boot-progress" max="12" value="0" aria-label="Startup modules completed"></progress><p id="boot-status" role="status">SYSTEM CHECK ACTIVE</p></div>`;
+  overlay.innerHTML=`<div class="ignition-console"><div class="ignition-top"><span>FRONTIER / STARTUP</span><strong>SYSTEM CHECK</strong></div><div class="ignition-reactor" aria-hidden="true"><svg viewBox="0 0 240 180"><g class="reactor-outer"><circle cx="120" cy="90" r="76"/><path d="M120 8V23 M120 157V172 M38 90H53 M187 90H202"/></g><g class="reactor-inner"><circle cx="120" cy="90" r="56"/><path d="M120 30L172 120H68Z"/></g><circle class="reactor-heart" cx="120" cy="90" r="25"/><path d="M0 90H35 M205 90H240"/></svg><div><small>INTERFACE CHECK</small><h1 id="boot-phase">CHECKING INTERFACE</h1><p id="boot-sound-status">AUDIO / STARTING</p></div></div><div class="boot-energy" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div id="boot-modules"></div><progress id="boot-progress" max="12" value="0" aria-label="Startup modules completed"></progress><p id="boot-status" role="status">SYSTEM CHECK ACTIVE</p></div>`;
   document.body.append(overlay);
   const available=(yes,ready='ONLINE',missing='UNAVAILABLE')=>()=>yes()?ready:missing;
   const stages=[
-    {name:'POWER DISTRIBUTION',wait:420,check:()=> 'STABLE'},
-    {name:'DISPLAY PROJECTORS',wait:680,check:()=>document.visibilityState==='prerender'?'STANDBY':'ONLINE'},
+    {name:'INTERFACE RUNTIME',wait:420,check:()=> 'READY'},
+    {name:'DISPLAY',wait:680,check:()=>document.visibilityState==='prerender'?'STANDBY':'ONLINE'},
     {name:'CONTROL BUS',wait:1050,check:available(()=>typeof globalThis.SurfaceTelemetry?.ingest==='function','BRIDGE READY','BRIDGE UNAVAILABLE')},
     {name:'NAVIGATION RECEIVER',wait:760,check:available(()=>!!navigator.geolocation,'RECEIVER AVAILABLE','HARDWARE UNAVAILABLE')},
     {name:'AUDIO PROCESSOR',wait:1380,check:available(()=>!!(globalThis.AudioContext||globalThis.webkitAudioContext),'AVAILABLE','UNAVAILABLE')},
@@ -17,7 +17,7 @@
     {name:'CAMERA ARRAY',wait:870,check:available(()=>!!navigator.mediaDevices?.getUserMedia,'INTERFACE AVAILABLE','HARDWARE UNAVAILABLE')},
     {name:'ULTRASONIC ARRAY',wait:1240,check:()=> 'NOT CONNECTED'},
     {name:'ENGINE / OBD',wait:1540,check:()=>q('#telemetry-source')?.textContent!=='NO LIVE SOURCE'?'LINK ACTIVE':'NOT CONNECTED'},
-    {name:'COMMAND INTERFACE',wait:460,check:()=> 'READY'}
+    {name:'DASHBOARD',wait:460,check:()=> 'READY'}
   ];
   let timer=null,closed=true,hum=null,humGain=null,states=[];
   function stopHum(){globalThis.CustomSounds?.stop('boot-hum');if(hum){try{hum.stop();hum.disconnect();humGain.disconnect()}catch{}hum=null;humGain=null}}
