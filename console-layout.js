@@ -59,28 +59,31 @@
   // Always-reachable media strip. Transport delegates to the existing playback controller.
   const controls = make('div','console-controls',`<button class="console-media-link" aria-label="Open audio"><span class="media-glyph">${icon('music')}</span><span><b id="console-track">Nothing playing</b><small id="console-source">Choose an audio source</small></span></button><button class="console-play" aria-label="Choose audio">${icon('play')}</button><label class="console-volume">VOL<input type="range" min="0" max="100" aria-label="Console volume"></label><div class="console-speed"><strong class="live-speed">—</strong><span>MPH</span></div>`);
   controls.querySelector('.console-media-link').onclick = () => showView(source === 'spotify' ? 'spotify' : 'radio');
-  controls.querySelector('.console-play').onclick = () => { if(source === 'spotify') showView('spotify'); else if(!localURL && !playing && !scanning) showView('radio'); else q('#radio [data-action="play"]').click(); };
+  let audioSelected = Boolean(localURL) || playing || scanning;
+  controls.querySelector('.console-play').onclick = () => { if(source === 'spotify') showView('spotify'); else if(!audioSelected) showView('radio'); else q('#radio [data-action="play"]').click(); };
   controls.querySelector('input').value = q('#volume').value;
   controls.querySelector('input').oninput = e => { q('#volume').value = e.target.value; q('#volume').dispatchEvent(new Event('input')); };
   q('#volume').addEventListener('input',() => { controls.querySelector('input').value = q('#volume').value; });
   controls.append(limit);nav.before(controls);
   function refreshMedia() {
     const active = playing && !scanning;
-    q('#console-track').textContent = source === 'spotify' ? 'Spotify player' : active || localURL ? q('#radio .track-name').textContent : 'Nothing playing';
-    q('#console-source').textContent = source === 'spotify' ? 'Open player to control playback' : scanning ? 'Scanning demo stations…' : localURL ? (active ? 'Local audio · playing' : 'Local audio · paused') : active ? 'Synthetic radio · demo' : 'Choose an audio source';
+    audioSelected = audioSelected || active || scanning || Boolean(localURL);
+    q('#console-track').textContent = source === 'spotify' ? 'Spotify player' : audioSelected ? q('#radio .track-name').textContent : 'Nothing playing';
+    q('#console-source').textContent = source === 'spotify' ? 'Open player to control playback' : scanning ? 'Scanning demo stations…' : localURL ? (active ? 'Local audio · playing' : 'Local audio · paused') : audioSelected ? (active ? 'Synthetic radio · demo' : 'Demo radio · paused') : 'Choose an audio source';
     q('.console-play').innerHTML = icon(active && source !== 'spotify' ? 'pause' : 'play');
-    q('.console-play').setAttribute('aria-label',source === 'spotify' ? 'Open Spotify player' : active ? 'Pause audio' : localURL ? 'Play audio' : 'Choose audio');
-    q('#home-audio-state').textContent = active ? 'PLAYING' : source === 'spotify' ? 'PLAYER LOADED' : 'NOT PLAYING';
-    q('#home-audio-title').textContent = active || localURL || source === 'spotify' ? q('#console-track').textContent : 'Your music. Your drive.';
-    q('#home-audio-source').textContent = active || localURL ? (localURL ? 'LOCAL AUDIO' : 'DEMO RADIO') : 'RADIO · LOCAL FILES · SPOTIFY';
-    q('#home-audio-description').textContent = active || localURL || source === 'spotify' ? q('#console-source').textContent : 'Choose something to listen to.';
+    q('.console-play').setAttribute('aria-label',source === 'spotify' ? 'Open Spotify player' : active ? 'Pause audio' : audioSelected ? 'Play audio' : 'Choose audio');
+    q('#home-audio-state').textContent = active ? 'PLAYING' : source === 'spotify' ? 'PLAYER LOADED' : audioSelected ? 'PAUSED' : 'NOT PLAYING';
+    q('#home-audio-title').textContent = audioSelected || source === 'spotify' ? q('#console-track').textContent : 'Your music. Your drive.';
+    q('#home-audio-source').textContent = source === 'spotify' ? 'SPOTIFY' : audioSelected ? (localURL ? 'LOCAL AUDIO' : 'DEMO RADIO') : 'RADIO · LOCAL FILES · SPOTIFY';
+    q('#home-audio-description').textContent = audioSelected || source === 'spotify' ? q('#console-source').textContent : 'Choose something to listen to.';
     media.classList.toggle('is-playing',active);
   }
   const mediaObserver = new MutationObserver(refreshMedia);
   mediaObserver.observe(nowPlaying,{attributes:true,childList:true,subtree:true});
   mediaObserver.observe(q('#radio .track-name'),{childList:true});
   mediaObserver.observe(q('#radio [data-action="play"]'),{attributes:true,childList:true});
-  new MutationObserver(() => { q('#console-cargo-count').textContent = q('#cargo-count').textContent.toLowerCase() + ' in inventory'; }).observe(q('#cargo-count'),{childList:true});
+  const refreshCargoCount = () => { q('#console-cargo-count').textContent = q('#cargo-count').textContent.toLowerCase() + ' in inventory'; };
+  new MutationObserver(refreshCargoCount).observe(q('#cargo-count'),{childList:true});refreshCargoCount();
 
   // Page-level controls, with no duplicate side rails or decorative tabs.
   document.querySelectorAll('.subtabs,.ed-tabs').forEach(n => n.remove());
